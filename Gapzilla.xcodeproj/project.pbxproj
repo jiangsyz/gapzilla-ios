@@ -1,0 +1,377 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {};
+	objectVersion = 56;
+	objects = {
+
+/* Begin PBXBuildFile section */
+		A10000000000000000000001 /* GapzillaApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = B10000000000000000000001 /* GapzillaApp.swift */; };
+		A10000000000000000000002 /* Models.swift in Sources */ = {isa = PBXBuildFile; fileRef = B10000000000000000000002 /* Models.swift */; };
+		A10000000000000000000003 /* DesignSystem.swift in Sources */ = {isa = PBXBuildFile; fileRef = B10000000000000000000003 /* DesignSystem.swift */; };
+		A10000000000000000000004 /* APIClient.swift in Sources */ = {isa = PBXBuildFile; fileRef = B10000000000000000000004 /* APIClient.swift */; };
+		A10000000000000000000005 /* KeychainStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = B10000000000000000000005 /* KeychainStore.swift */; };
+		A10000000000000000000006 /* AppStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = B10000000000000000000006 /* AppStore.swift */; };
+		A10000000000000000000007 /* AuthenticationViews.swift in Sources */ = {isa = PBXBuildFile; fileRef = B10000000000000000000007 /* AuthenticationViews.swift */; };
+		A10000000000000000000008 /* RecordEventSheet.swift in Sources */ = {isa = PBXBuildFile; fileRef = B10000000000000000000008 /* RecordEventSheet.swift */; };
+		A10000000000000000000009 /* GoalViews.swift in Sources */ = {isa = PBXBuildFile; fileRef = B10000000000000000000009 /* GoalViews.swift */; };
+		A1000000000000000000000A /* TodayView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B1000000000000000000000A /* TodayView.swift */; };
+		A1000000000000000000000B /* HistoryView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B1000000000000000000000B /* HistoryView.swift */; };
+		A1000000000000000000000C /* InsightsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B1000000000000000000000C /* InsightsView.swift */; };
+		A1000000000000000000000D /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = B1000000000000000000000D /* Assets.xcassets */; };
+		A1000000000000000000000E /* GoalMetricsTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = B1000000000000000000000F /* GoalMetricsTests.swift */; };
+/* End PBXBuildFile section */
+
+/* Begin PBXFileReference section */
+		B10000000000000000000001 /* GapzillaApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Gapzilla/App/GapzillaApp.swift; sourceTree = "<group>"; };
+		B10000000000000000000002 /* Models.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Gapzilla/Core/Models.swift; sourceTree = "<group>"; };
+		B10000000000000000000003 /* DesignSystem.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Gapzilla/Core/DesignSystem.swift; sourceTree = "<group>"; };
+		B10000000000000000000004 /* APIClient.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Gapzilla/Core/APIClient.swift; sourceTree = "<group>"; };
+		B10000000000000000000005 /* KeychainStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Gapzilla/Core/KeychainStore.swift; sourceTree = "<group>"; };
+		B10000000000000000000006 /* AppStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Gapzilla/Core/AppStore.swift; sourceTree = "<group>"; };
+		B10000000000000000000007 /* AuthenticationViews.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Gapzilla/Features/Authentication/AuthenticationViews.swift; sourceTree = "<group>"; };
+		B10000000000000000000008 /* RecordEventSheet.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Gapzilla/Features/Record/RecordEventSheet.swift; sourceTree = "<group>"; };
+		B10000000000000000000009 /* GoalViews.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Gapzilla/Features/Goals/GoalViews.swift; sourceTree = "<group>"; };
+		B1000000000000000000000A /* TodayView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Gapzilla/Features/Today/TodayView.swift; sourceTree = "<group>"; };
+		B1000000000000000000000B /* HistoryView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Gapzilla/Features/History/HistoryView.swift; sourceTree = "<group>"; };
+		B1000000000000000000000C /* InsightsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Gapzilla/Features/Insights/InsightsView.swift; sourceTree = "<group>"; };
+		B1000000000000000000000D /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Gapzilla/Resources/Assets.xcassets; sourceTree = "<group>"; };
+		B1000000000000000000000E /* Gapzilla.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Gapzilla.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		B1000000000000000000000F /* GoalMetricsTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GapzillaTests/GoalMetricsTests.swift; sourceTree = "<group>"; };
+		B10000000000000000000010 /* GapzillaTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = GapzillaTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+/* End PBXFileReference section */
+
+/* Begin PBXContainerItemProxy section */
+		G10000000000000000000001 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = E10000000000000000000002 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = E10000000000000000000001;
+			remoteInfo = Gapzilla;
+		};
+/* End PBXContainerItemProxy section */
+
+/* Begin PBXFrameworksBuildPhase section */
+		C10000000000000000000001 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = ();
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		C10000000000000000000005 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = ();
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXFrameworksBuildPhase section */
+
+/* Begin PBXGroup section */
+		D10000000000000000000001 = {
+			isa = PBXGroup;
+			children = (
+				B10000000000000000000001 /* GapzillaApp.swift */,
+				B10000000000000000000002 /* Models.swift */,
+				B10000000000000000000003 /* DesignSystem.swift */,
+				B10000000000000000000004 /* APIClient.swift */,
+				B10000000000000000000005 /* KeychainStore.swift */,
+				B10000000000000000000006 /* AppStore.swift */,
+				B10000000000000000000007 /* AuthenticationViews.swift */,
+				B10000000000000000000008 /* RecordEventSheet.swift */,
+				B10000000000000000000009 /* GoalViews.swift */,
+				B1000000000000000000000A /* TodayView.swift */,
+				B1000000000000000000000B /* HistoryView.swift */,
+				B1000000000000000000000C /* InsightsView.swift */,
+				B1000000000000000000000D /* Assets.xcassets */,
+				D10000000000000000000003 /* GapzillaTests */,
+				D10000000000000000000002 /* Products */,
+			);
+			sourceTree = "<group>";
+		};
+		D10000000000000000000002 /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				B1000000000000000000000E /* Gapzilla.app */,
+				B10000000000000000000010 /* GapzillaTests.xctest */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		D10000000000000000000003 /* GapzillaTests */ = {
+			isa = PBXGroup;
+			children = (
+				B1000000000000000000000F /* GoalMetricsTests.swift */,
+			);
+			name = GapzillaTests;
+			sourceTree = "<group>";
+		};
+/* End PBXGroup section */
+
+/* Begin PBXNativeTarget section */
+		E10000000000000000000001 /* Gapzilla */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = F10000000000000000000002 /* Build configuration list for PBXNativeTarget "Gapzilla" */;
+			buildPhases = (
+				C10000000000000000000002 /* Sources */,
+				C10000000000000000000001 /* Frameworks */,
+				C10000000000000000000003 /* Resources */,
+			);
+			buildRules = ();
+			dependencies = ();
+			name = Gapzilla;
+			productName = Gapzilla;
+			productReference = B1000000000000000000000E /* Gapzilla.app */;
+			productType = "com.apple.product-type.application";
+		};
+		E10000000000000000000003 /* GapzillaTests */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = F10000000000000000000003 /* Build configuration list for PBXNativeTarget "GapzillaTests" */;
+			buildPhases = (
+				C10000000000000000000004 /* Sources */,
+				C10000000000000000000005 /* Frameworks */,
+				C10000000000000000000006 /* Resources */,
+			);
+			buildRules = ();
+			dependencies = (
+				G10000000000000000000002 /* PBXTargetDependency */,
+			);
+			name = GapzillaTests;
+			productName = GapzillaTests;
+			productReference = B10000000000000000000010 /* GapzillaTests.xctest */;
+			productType = "com.apple.product-type.bundle.unit-test";
+		};
+/* End PBXNativeTarget section */
+
+/* Begin PBXProject section */
+		E10000000000000000000002 /* Project object */ = {
+			isa = PBXProject;
+			attributes = {
+				BuildIndependentTargetsInParallel = 1;
+				LastSwiftUpdateCheck = 2620;
+				LastUpgradeCheck = 2620;
+				TargetAttributes = {
+					E10000000000000000000001 = { CreatedOnToolsVersion = 26.2; };
+					E10000000000000000000003 = { CreatedOnToolsVersion = 26.2; TestTargetID = E10000000000000000000001; };
+				};
+			};
+			buildConfigurationList = F10000000000000000000001 /* Build configuration list for PBXProject "Gapzilla" */;
+			compatibilityVersion = "Xcode 14.0";
+			developmentRegion = en;
+			hasScannedForEncodings = 0;
+			knownRegions = (en, Base);
+			mainGroup = D10000000000000000000001;
+			productRefGroup = D10000000000000000000002 /* Products */;
+			projectDirPath = "";
+			projectRoot = "";
+			targets = (
+				E10000000000000000000001 /* Gapzilla */,
+				E10000000000000000000003 /* GapzillaTests */,
+			);
+		};
+/* End PBXProject section */
+
+/* Begin PBXResourcesBuildPhase section */
+		C10000000000000000000003 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (A1000000000000000000000D /* Assets.xcassets in Resources */);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		C10000000000000000000006 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = ();
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXResourcesBuildPhase section */
+
+/* Begin PBXSourcesBuildPhase section */
+		C10000000000000000000002 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				A10000000000000000000001 /* GapzillaApp.swift in Sources */,
+				A10000000000000000000002 /* Models.swift in Sources */,
+				A10000000000000000000003 /* DesignSystem.swift in Sources */,
+				A10000000000000000000004 /* APIClient.swift in Sources */,
+				A10000000000000000000005 /* KeychainStore.swift in Sources */,
+				A10000000000000000000006 /* AppStore.swift in Sources */,
+				A10000000000000000000007 /* AuthenticationViews.swift in Sources */,
+				A10000000000000000000008 /* RecordEventSheet.swift in Sources */,
+				A10000000000000000000009 /* GoalViews.swift in Sources */,
+				A1000000000000000000000A /* TodayView.swift in Sources */,
+				A1000000000000000000000B /* HistoryView.swift in Sources */,
+				A1000000000000000000000C /* InsightsView.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		C10000000000000000000004 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				A1000000000000000000000E /* GoalMetricsTests.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXSourcesBuildPhase section */
+
+/* Begin PBXTargetDependency section */
+		G10000000000000000000002 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = E10000000000000000000001 /* Gapzilla */;
+			targetProxy = G10000000000000000000001 /* PBXContainerItemProxy */;
+		};
+/* End PBXTargetDependency section */
+
+/* Begin XCBuildConfiguration section */
+		F20000000000000000000001 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				DEBUG_INFORMATION_FORMAT = dwarf;
+				ENABLE_TESTABILITY = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu17;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				ONLY_ACTIVE_ARCH = YES;
+				SDKROOT = iphoneos;
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = DEBUG;
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+			};
+			name = Debug;
+		};
+		F20000000000000000000002 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				GCC_C_LANGUAGE_STANDARD = gnu17;
+				SDKROOT = iphoneos;
+				SWIFT_COMPILATION_MODE = wholemodule;
+				SWIFT_OPTIMIZATION_LEVEL = "-O";
+				VALIDATE_PRODUCT = YES;
+			};
+			name = Release;
+		};
+		F20000000000000000000003 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_ASSET_PATHS = "";
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_KEY_CFBundleDisplayName = Gapzilla;
+				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.healthcare-fitness";
+				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
+				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
+				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = online.quietbase.gapzilla;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Debug;
+		};
+		F20000000000000000000004 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_KEY_CFBundleDisplayName = Gapzilla;
+				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.healthcare-fitness";
+				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
+				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
+				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = online.quietbase.gapzilla;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Release;
+		};
+		F20000000000000000000005 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				CODE_SIGN_STYLE = Automatic;
+				GENERATE_INFOPLIST_FILE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@loader_path/Frameworks",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = online.quietbase.gapzilla.tests;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_EMIT_LOC_STRINGS = NO;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/Gapzilla.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/Gapzilla";
+			};
+			name = Debug;
+		};
+		F20000000000000000000006 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				CODE_SIGN_STYLE = Automatic;
+				GENERATE_INFOPLIST_FILE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@loader_path/Frameworks",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = online.quietbase.gapzilla.tests;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_EMIT_LOC_STRINGS = NO;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/Gapzilla.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/Gapzilla";
+			};
+			name = Release;
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		F10000000000000000000001 /* Build configuration list for PBXProject "Gapzilla" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (F20000000000000000000001 /* Debug */, F20000000000000000000002 /* Release */);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		F10000000000000000000002 /* Build configuration list for PBXNativeTarget "Gapzilla" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (F20000000000000000000003 /* Debug */, F20000000000000000000004 /* Release */);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		F10000000000000000000003 /* Build configuration list for PBXNativeTarget "GapzillaTests" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				F20000000000000000000005 /* Debug */,
+				F20000000000000000000006 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+/* End XCConfigurationList section */
+	};
+	rootObject = E10000000000000000000002 /* Project object */;
+}

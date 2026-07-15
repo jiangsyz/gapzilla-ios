@@ -1,0 +1,212 @@
+import Charts
+import SwiftUI
+
+struct InsightsView: View {
+    @EnvironmentObject private var store: AppStore
+    @State private var recordKind: EventKind?
+    @State private var presentsGoals = false
+    @State private var presentsAccount = false
+
+    var body: some View {
+        NavigationStack {
+            ZStack {
+                GlowBackground()
+                ScrollView {
+                    LazyVStack(spacing: 18) {
+                        InsightHeroCard()
+                        GapTrendCard()
+                        UrgeEvidenceCard()
+                    }
+                    .padding(.horizontal, 18)
+                    .padding(.top, 10)
+                    .padding(.bottom, 28)
+                }
+                .refreshable { await store.refreshAll() }
+            }
+            .navigationTitle(store.text("分析", "Insights"))
+            .navigationBarTitleDisplayMode(.large)
+            .toolbar {
+                ToolbarItem(placement: .topBarLeading) {
+                    GoalToolbarMenu(presentsManager: $presentsGoals)
+                }
+                ToolbarItemGroup(placement: .topBarTrailing) {
+                    Button { recordKind = .slip } label: { Image(systemName: "plus").fontWeight(.bold) }
+                    Button { presentsAccount = true } label: { Image(systemName: "person.crop.circle") }
+                }
+            }
+        }
+        .sheet(item: $recordKind) { RecordEventSheet(kind: $0) }
+        .sheet(isPresented: $presentsGoals) { GoalManagerSheet() }
+        .sheet(isPresented: $presentsAccount) { AccountSheet() }
+    }
+}
+
+private struct InsightHeroCard: View {
+    @EnvironmentObject private var store: AppStore
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 16) {
+            SectionTitle(
+                store.text("先看方向，不看完美", "Direction over perfection"),
+                eyebrow: store.text("变化摘要", "Progress summary"),
+                subtitle: summary
+            )
+            HStack(spacing: 10) {
+                MetricTile(value: store.metrics.currentGap, label: store.text("当前间隔", "Current"), color: GapStyle.coral)
+                MetricTile(value: store.metrics.bestGap, label: store.text("最长间隔", "Best"), color: GapStyle.plum)
+                MetricTile(value: store.metrics.averageGap, label: store.text("平均间隔", "Average"), color: GapStyle.ink)
+            }
+            if let previous = store.metrics.previousGap {
+                HStack {
+                    Label(store.text("上一次间隔", "Previous gap"), systemImage: "clock.arrow.circlepath")
+                    Spacer()
+                    Text("\(previous) \(store.text("天", "days"))").fontWeight(.bold)
+                }
+                .font(.subheadline)
+                .foregroundStyle(GapStyle.secondary)
+                .padding(.top, 2)
+            }
+        }
+        .softCard()
+    }
+
+    private var summary: String {
+        guard let previous = store.metrics.previousGap else {
+            return store.text("继续记录，第二次破例后会出现可比较的完整间隔。", "Keep recording. A comparable completed gap appears after the next slip.")
+        }
+        let delta = store.metrics.currentGap - previous
+        if delta > 0 {
+            return store.text("当前间隔比上一次多 \(delta) 天。", "The current gap is \(delta) days longer than the previous one.")
+        }
+        if delta == 0 {
+            return store.text("当前间隔已经追平上一次。", "The current gap has matched the previous one.")
+        }
+        return store.text("还有 \(-delta) 天追平上一次，变化仍在继续。", "\(-delta) days to match the previous gap. The story is still unfolding.")
+    }
+}
+
+private struct GapTrendCard: View {
+    @EnvironmentObject private var store: AppStore
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 16) {
+            SectionTitle(
+                store.text("间隔趋势", "Gap trend"),
+                subtitle: store.text("每个点代表一次完整间隔，最后一点是当前进度。", "Each point is a completed gap; the last point is current progress.")
+            )
+            if store.metrics.trend.isEmpty {
+                ContentUnavailableView(
+                    store.text("还没有趋势", "No trend yet"),
+                    systemImage: "chart.xyaxis.line",
+                    description: Text(store.text("记录破例后，趋势会从这里生长。", "The trend starts growing after a slip is recorded."))
+                )
+                .frame(height: 210)
+            } else {
+                Chart(store.metrics.trend) { point in
+                    AreaMark(
+                        x: .value("Date", point.date),
+                        y: .value("Days", point.days)
+                    )
+                    .foregroundStyle(LinearGradient(
+                        colors: [GapStyle.coral.opacity(0.28), GapStyle.coral.opacity(0.02)],
+                        startPoint: .top,
+                        endPoint: .bottom
+                    ))
+                    LineMark(
+                        x: .value("Date", point.date),
+                        y: .value("Days", point.days)
+                    )
+                    .lineStyle(StrokeStyle(lineWidth: 3, lineCap: .round, lineJoin: .round))
+                    .foregroundStyle(GapStyle.coral)
+                    PointMark(
+                        x: .value("Date", point.date),
+                        y: .value("Days", point.days)
+                    )
+                    .symbolSize(48)
+                    .foregroundStyle(GapStyle.plum)
+                }
+                .chartYAxis {
+                    AxisMarks(position: .leading) { _ in
+                        AxisGridLine().foregroundStyle(GapStyle.line)
+                        AxisValueLabel().foregroundStyle(GapStyle.secondary)
+                    }
+                }
+                .chartXAxis {
+                    AxisMarks(values: .automatic(desiredCount: 4)) { _ in
+                        AxisValueLabel(format: chartDateFormat)
+                            .foregroundStyle(GapStyle.secondary)
+                    }
+                }
+                .frame(height: 230)
+            }
+        }
+        .softCard()
+    }
+
+    private var chartDateFormat: Date.FormatStyle {
+        .dateTime
+            .month(.abbreviated)
+            .day()
+            .locale(Locale(identifier: store.language.rawValue))
+    }
+}
+
+private struct MonthUrges: Identifiable {
+    let id: Date
+    let month: Date
+    let count: Int
+}
+
+private struct UrgeEvidenceCard: View {
+    @EnvironmentObject private var store: AppStore
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 16) {
+            SectionTitle(
+                store.text("被你控制住的冲动", "Urges you controlled"),
+                subtitle: store.text("它们不重置间隔，但构成了重要的正向证据。", "They do not reset the gap, but they are important positive evidence.")
+            )
+            HStack(alignment: .firstTextBaseline, spacing: 6) {
+                Text("\(store.metrics.urgesLastSevenDays)")
+                    .font(.system(size: 44, weight: .bold, design: .rounded))
+                    .foregroundStyle(GapStyle.plum)
+                Text(store.text("次 / 近 7 天", "in the last 7 days"))
+                    .font(.subheadline.weight(.semibold))
+                    .foregroundStyle(GapStyle.secondary)
+            }
+            Chart(months) { item in
+                BarMark(
+                    x: .value("Month", item.month, unit: .month),
+                    y: .value("Urges", item.count)
+                )
+                .foregroundStyle(GapStyle.plum.gradient)
+                .cornerRadius(5)
+            }
+            .chartYAxis(.hidden)
+            .chartXAxis {
+                AxisMarks(values: .stride(by: .month)) { _ in
+                    AxisValueLabel(format: monthFormat)
+                }
+            }
+            .frame(height: 130)
+        }
+        .softCard()
+    }
+
+    private var months: [MonthUrges] {
+        let calendar = Calendar.current
+        let current = calendar.date(from: calendar.dateComponents([.year, .month], from: Date())) ?? Date()
+        return (-5...0).compactMap { offset in
+            guard let month = calendar.date(byAdding: .month, value: offset, to: current),
+                  let next = calendar.date(byAdding: .month, value: 1, to: month) else { return nil }
+            let count = store.events.filter { $0.kind == .urge && $0.date >= month && $0.date < next }.count
+            return MonthUrges(id: month, month: month, count: count)
+        }
+    }
+
+    private var monthFormat: Date.FormatStyle {
+        .dateTime
+            .month(.abbreviated)
+            .locale(Locale(identifier: store.language.rawValue))
+    }
+}
