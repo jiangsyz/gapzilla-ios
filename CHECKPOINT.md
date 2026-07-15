@@ -13,17 +13,10 @@
 - 仓库：`/Users/jiangshen/www/gapzilla-ios`
 - 当前分支：`codex/native-ios-foundation`
 - `main` 基础提交：`4a5397c chore: bootstrap repository`
-- 当前 iOS 代码尚未提交、尚未推送、尚未创建 Pull Request。
+- iOS 功能提交：`1b8762e feat: build native Gapzilla iOS app`
+- `main` 和 `codex/native-ios-foundation` 均已推送到 GitHub。
+- Pull Request：`https://github.com/jiangsyz/gapzilla-ios/pull/1`
 - 后续必须通过 Pull Request 合并到 `main`，不要直接在 `main` 开发或合并。
-
-当前未跟踪内容：
-
-- `.gitignore`
-- `Gapzilla.xcodeproj/`
-- `Gapzilla/`
-- `GapzillaTests/`
-- `README.md`
-- `CHECKPOINT.md`
 
 ## 已完成内容
 
@@ -139,14 +132,14 @@ xcodebuild -quiet \
 
 第一次使用原有模拟器截图时，被模拟器自身的 Apple 账号验证弹窗遮挡。随后使用干净的 `Gapzilla-Preview` 专用模拟器完成了全部页面验收。
 
-剩余工作只有 Git 收尾：检查差异、提交当前分支、推送并创建 Pull Request。
+当前代码已提交并推送，Pull Request #1 已创建，等待审阅和合并。
 
 ## 下次继续顺序
 
 1. 读取本文件和仓库 `README.md`。
-2. 查看 `git status`，确认仍在 `codex/native-ios-foundation`。
-3. 如代码未发生变化，无需重复视觉设计；执行最终差异检查即可。
-4. 提交当前分支、推送并创建 Pull Request。
+2. 打开 Pull Request #1，检查自动化状态和审阅意见。
+3. 如有审阅意见，在 `codex/native-ios-foundation` 上修改并继续推送。
+4. 审阅通过后，由用户确认是否合并到 `main`。
 
 ## 关联本地项目
 
