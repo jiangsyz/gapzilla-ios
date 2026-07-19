@@ -147,17 +147,16 @@ private struct CalendarDayCell: View {
         .frame(maxWidth: .infinity)
         .frame(height: 42)
         .background(
-            Calendar.current.isDateInToday(date) ? GapStyle.ink : eventBackground,
+            dayBackground,
             in: RoundedRectangle(cornerRadius: 12, style: .continuous)
         )
         .overlay {
-            if !Calendar.current.isDateInToday(date), kind == nil {
-                RoundedRectangle(cornerRadius: 12).stroke(GapStyle.line.opacity(0.8))
-            }
+            RoundedRectangle(cornerRadius: 12, style: .continuous)
+                .stroke(dayBorder, lineWidth: Calendar.current.isDateInToday(date) ? 1.5 : 1)
         }
     }
 
-    private var eventBackground: Color {
+    private var dayBackground: Color {
         switch kind {
         case .slip:
             return GapStyle.coralSoft
@@ -169,12 +168,18 @@ private struct CalendarDayCell: View {
     }
 
     private var dayForeground: Color {
-        if Calendar.current.isDateInToday(date) { return .white }
         switch kind {
         case .slip: return GapStyle.coral
         case .urge: return GapStyle.plum
         case nil: return GapStyle.ink
         }
+    }
+
+    private var dayBorder: Color {
+        if Calendar.current.isDateInToday(date) {
+            return GapStyle.secondary.opacity(0.42)
+        }
+        return kind == nil ? GapStyle.line.opacity(0.8) : .clear
     }
 }
 
