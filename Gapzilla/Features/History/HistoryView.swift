@@ -57,7 +57,7 @@ private struct CalendarCard: View {
                     Text(month, format: .dateTime.year().month(.wide))
                         .font(.title3.weight(.bold))
                         .foregroundStyle(GapStyle.ink)
-                    Text(store.text("破例和冲动会分开标记。", "Slips and urges are marked separately."))
+                    Text(store.text("同日有破例时，日历只标记破例。", "When both occur, the calendar shows the slip."))
                         .font(.caption)
                         .foregroundStyle(GapStyle.secondary)
                 }
@@ -77,7 +77,7 @@ private struct CalendarCard: View {
                 }
                 ForEach(days) { day in
                     if let date = day.date {
-                        CalendarDayCell(date: date, kinds: eventKinds(on: date))
+                        CalendarDayCell(date: date, kind: store.metrics.dayKind(on: date))
                     } else {
                         Color.clear.frame(height: 42)
                     }
@@ -112,10 +112,6 @@ private struct CalendarCard: View {
         return result
     }
 
-    private func eventKinds(on date: Date) -> Set<EventKind> {
-        Set(store.events.filter { Calendar.current.isDate($0.date, inSameDayAs: date) }.map(\.kind))
-    }
-
     private func monthButton(_ icon: String, delta: Int) -> some View {
         Button {
             if let next = Calendar.current.date(byAdding: .month, value: delta, to: month) { month = next }
@@ -132,16 +128,19 @@ private struct CalendarCard: View {
 
 private struct CalendarDayCell: View {
     let date: Date
-    let kinds: Set<EventKind>
+    let kind: EventKind?
 
     var body: some View {
         VStack(spacing: 4) {
             Text("\(Calendar.current.component(.day, from: date))")
                 .font(.subheadline.weight(Calendar.current.isDateInToday(date) ? .bold : .semibold))
-                .foregroundStyle(Calendar.current.isDateInToday(date) ? .white : GapStyle.ink)
-            HStack(spacing: 3) {
-                if kinds.contains(.slip) { Circle().fill(GapStyle.coral).frame(width: 5, height: 5) }
-                if kinds.contains(.urge) { Circle().fill(GapStyle.plum).frame(width: 5, height: 5) }
+                .foregroundStyle(dayForeground)
+            HStack {
+                if let kind {
+                    Circle()
+                        .fill(kind == .slip ? GapStyle.coral : GapStyle.plum)
+                        .frame(width: 5, height: 5)
+                }
             }
             .frame(height: 5)
         }
@@ -152,23 +151,30 @@ private struct CalendarDayCell: View {
             in: RoundedRectangle(cornerRadius: 12, style: .continuous)
         )
         .overlay {
-            if !Calendar.current.isDateInToday(date) {
+            if !Calendar.current.isDateInToday(date), kind == nil {
                 RoundedRectangle(cornerRadius: 12).stroke(GapStyle.line.opacity(0.8))
             }
         }
     }
 
     private var eventBackground: Color {
-        if kinds.contains(.slip) && kinds.contains(.urge) {
-            return GapStyle.coralSoft.opacity(0.9)
+        switch kind {
+        case .slip:
+            return GapStyle.coralSoft
+        case .urge:
+            return GapStyle.plumSoft
+        case nil:
+            return .clear
         }
-        if kinds.contains(.slip) {
-            return GapStyle.coralSoft.opacity(0.75)
+    }
+
+    private var dayForeground: Color {
+        if Calendar.current.isDateInToday(date) { return .white }
+        switch kind {
+        case .slip: return GapStyle.coral
+        case .urge: return GapStyle.plum
+        case nil: return GapStyle.ink
         }
-        if kinds.contains(.urge) {
-            return GapStyle.plumSoft.opacity(0.9)
-        }
-        return .clear
     }
 }
 
@@ -229,7 +235,7 @@ private struct HistoryEventRow: View {
             }
             VStack(alignment: .leading, spacing: 5) {
                 HStack {
-                    Text(event.kind == .slip ? store.text("破例", "Slip") : store.text("控制住冲动", "Urge controlled"))
+                    Text(event.kind == .slip ? store.text("破例", "Slip") : store.text("冲动", "Urge"))
                         .font(.subheadline.weight(.bold))
                     Spacer()
                     Text(event.date, format: .dateTime.month(.abbreviated).day())

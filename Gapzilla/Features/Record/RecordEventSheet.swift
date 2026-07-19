@@ -17,16 +17,16 @@ struct RecordEventSheet: View {
             Form {
                 Section {
                     Picker(store.text("类型", "Type"), selection: $kind) {
-                        Label(store.text("记录破例", "Slip"), systemImage: "arrow.counterclockwise")
+                        Label(store.text("破例", "Slip"), systemImage: "arrow.counterclockwise")
                             .tag(EventKind.slip)
-                        Label(store.text("控制住冲动", "Urge controlled"), systemImage: "hand.raised.fill")
+                        Label(store.text("冲动", "Urge"), systemImage: "hand.raised.fill")
                             .tag(EventKind.urge)
                     }
                     .pickerStyle(.segmented)
                 } footer: {
                     Text(kind == .slip
                          ? store.text("破例会开启一个新的间隔。", "A slip starts a new gap.")
-                         : store.text("冲动会被保留下来，但不会重置间隔。", "A controlled urge stays visible without resetting the gap."))
+                         : store.text("只记录冲动事实；同日没有破例时，系统才会将它视为控制住。", "Record the urge itself. It counts as controlled only if no slip occurs that day."))
                 }
 
                 Section(store.text("发生日期", "Date")) {

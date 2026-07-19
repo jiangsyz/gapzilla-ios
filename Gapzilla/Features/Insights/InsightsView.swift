@@ -164,7 +164,7 @@ private struct UrgeEvidenceCard: View {
         VStack(alignment: .leading, spacing: 16) {
             SectionTitle(
                 store.text("被你控制住的冲动", "Urges you controlled"),
-                subtitle: store.text("它们不重置间隔，但构成了重要的正向证据。", "They do not reset the gap, but they are important positive evidence.")
+                subtitle: store.text("只统计同日没有破例的冲动。", "Only urges on days without a slip are counted.")
             )
             HStack(alignment: .firstTextBaseline, spacing: 6) {
                 Text("\(store.metrics.urgesLastSevenDays)")
@@ -199,7 +199,7 @@ private struct UrgeEvidenceCard: View {
         return (-5...0).compactMap { offset in
             guard let month = calendar.date(byAdding: .month, value: offset, to: current),
                   let next = calendar.date(byAdding: .month, value: 1, to: month) else { return nil }
-            let count = store.events.filter { $0.kind == .urge && $0.date >= month && $0.date < next }.count
+            let count = store.metrics.controlledUrges.filter { $0.date >= month && $0.date < next }.count
             return MonthUrges(id: month, month: month, count: count)
         }
     }

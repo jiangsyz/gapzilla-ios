@@ -32,6 +32,30 @@ final class GoalMetricsTests: XCTestCase {
         XCTAssertNil(metrics.impactDays(for: urge))
     }
 
+    func testSlipOverridesUrgeForSameDayInterpretation() throws {
+        let today = try date("2026-07-15")
+        let earlierSlip = event("slip-1", "2026-07-01", .slip)
+        let urge = event("urge", "2026-07-14", .urge)
+        let sameDaySlip = event("slip-2", "2026-07-14", .slip)
+
+        let metrics = GoalMetrics(events: [urge, sameDaySlip, earlierSlip], today: today)
+
+        XCTAssertEqual(metrics.dayKind(on: try date("2026-07-14")), .slip)
+        XCTAssertTrue(metrics.controlledUrges.isEmpty)
+        XCTAssertEqual(metrics.urgesLastSevenDays, 0)
+    }
+
+    func testUrgeOnlyDayIsDerivedAsControlled() throws {
+        let today = try date("2026-07-15")
+        let urge = event("urge", "2026-07-14", .urge)
+
+        let metrics = GoalMetrics(events: [urge], today: today)
+
+        XCTAssertEqual(metrics.dayKind(on: try date("2026-07-14")), .urge)
+        XCTAssertEqual(metrics.controlledUrges, [urge])
+        XCTAssertEqual(metrics.urgesLastSevenDays, 1)
+    }
+
     func testImpactUsesNextSlipAndCurrentDay() throws {
         let today = try date("2026-07-15")
         let first = event("slip-1", "2026-06-01", .slip)

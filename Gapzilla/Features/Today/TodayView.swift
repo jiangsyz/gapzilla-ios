@@ -126,8 +126,8 @@ private struct QuickRecordCard: View {
                     color: GapStyle.coral
                 ) { recordKind = .slip }
                 QuickRecordButton(
-                    title: store.text("控制住冲动", "Urge controlled"),
-                    subtitle: store.text("保留正向证据", "Keeps positive proof"),
+                    title: store.text("记录冲动", "Record urge"),
+                    subtitle: store.text("只记录发生的事实", "Record what happened"),
                     icon: "hand.raised.fill",
                     color: GapStyle.plum
                 ) { recordKind = .urge }
@@ -170,7 +170,7 @@ private struct ProgressSummaryCard: View {
             HStack(spacing: 10) {
                 MetricTile(value: store.metrics.bestGap, label: store.text("最长", "Best"), color: GapStyle.coral)
                 MetricTile(value: store.metrics.averageGap, label: store.text("平均", "Average"), color: GapStyle.plum)
-                MetricTile(value: store.metrics.urgesLastSevenDays, label: store.text("近7天冲动", "7d urges"), color: GapStyle.ink)
+                MetricTile(value: store.metrics.urgesLastSevenDays, label: store.text("近7天控制住", "Controlled in 7d"), color: GapStyle.ink)
             }
         }
         .softCard()
@@ -237,7 +237,7 @@ struct EventCompactRow: View {
                     in: RoundedRectangle(cornerRadius: 12, style: .continuous)
                 )
             VStack(alignment: .leading, spacing: 3) {
-                Text(event.kind == .slip ? store.text("破例", "Slip") : store.text("控制住冲动", "Urge controlled"))
+                Text(event.kind == .slip ? store.text("破例", "Slip") : store.text("冲动", "Urge"))
                     .font(.subheadline.weight(.semibold))
                 Text(event.note.isEmpty ? store.text("没有备注", "No note") : event.note)
                     .font(.caption)

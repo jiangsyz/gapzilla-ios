@@ -153,8 +153,16 @@ struct GoalMetrics {
     let events: [GoalEvent]
     let today: Date
 
+    private var slipDates: Set<String> {
+        Set(events.filter { $0.kind == .slip }.map(\.occurredOn))
+    }
+
     private var slipsAscending: [GoalEvent] {
         events.filter { $0.kind == .slip }.sorted { $0.date < $1.date }
+    }
+
+    var controlledUrges: [GoalEvent] {
+        events.filter { $0.kind == .urge && !slipDates.contains($0.occurredOn) }
     }
 
     var currentGap: Int {
@@ -179,7 +187,7 @@ struct GoalMetrics {
 
     var urgesLastSevenDays: Int {
         let start = Calendar.current.date(byAdding: .day, value: -6, to: Calendar.current.startOfDay(for: today)) ?? today
-        return events.filter { $0.kind == .urge && $0.date >= start && $0.date <= today }.count
+        return controlledUrges.filter { $0.date >= start && $0.date <= today }.count
     }
 
     var trend: [GapPoint] {
@@ -195,5 +203,13 @@ struct GoalMetrics {
               let index = slipsAscending.firstIndex(where: { $0.id == event.id }) else { return nil }
         if index == slipsAscending.count - 1 { return currentGap }
         return AppDate.dayDistance(from: event.date, to: slipsAscending[index + 1].date)
+    }
+
+    func dayKind(on date: Date) -> EventKind? {
+        let occurredOn = AppDate.api.string(from: date)
+        let eventsOnDay = events.filter { $0.occurredOn == occurredOn }
+        if eventsOnDay.contains(where: { $0.kind == .slip }) { return .slip }
+        if eventsOnDay.contains(where: { $0.kind == .urge }) { return .urge }
+        return nil
     }
 }

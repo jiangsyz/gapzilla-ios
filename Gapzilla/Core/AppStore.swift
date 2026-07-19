@@ -365,7 +365,7 @@ private extension AppStore {
             event("event-3", 23, .slip, "雨天有些烦躁，但我只记录发生的事实。"),
             event("event-4", 28, .urge, "把注意力转移到了阅读。"),
             event("event-5", 45, .slip, "这次间隔已经明显变长。"),
-            event("event-6", 50, .urge, "控制住一次冲动。"),
+            event("event-6", 50, .urge, "出现一次冲动。"),
             event("event-7", 63, .slip, "没有预想中的难受。"),
             event("event-8", 76, .slip, "晚饭后的惯性动作。"),
             event("event-9", 84, .slip, "开始认真记录。")

@@ -1,10 +1,10 @@
 import SwiftUI
 
 enum GapStyle {
-    static let coral = Color(red: 1.00, green: 0.23, blue: 0.38)
-    static let coralSoft = Color(red: 1.00, green: 0.93, blue: 0.95)
-    static let plum = Color(red: 0.38, green: 0.24, blue: 0.34)
-    static let plumSoft = Color(red: 0.96, green: 0.92, blue: 0.95)
+    static let coral = Color(red: 1.00, green: 82 / 255, blue: 105 / 255)
+    static let coralSoft = Color(red: 1.00, green: 238 / 255, blue: 240 / 255)
+    static let plum = Color(red: 124 / 255, green: 99 / 255, blue: 117 / 255)
+    static let plumSoft = Color(red: 243 / 255, green: 237 / 255, blue: 242 / 255)
     static let ink = Color(red: 0.15, green: 0.14, blue: 0.25)
     static let secondary = Color(red: 0.40, green: 0.43, blue: 0.51)
     static let line = Color(red: 0.89, green: 0.90, blue: 0.93)

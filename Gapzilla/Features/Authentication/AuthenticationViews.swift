@@ -60,8 +60,8 @@ struct WelcomeView: View {
                         .fixedSize(horizontal: false, vertical: true)
 
                     Text(store.text(
-                        "Gapzilla 记录破例，也记录被你控制住的冲动。一次困难，不会抹掉周围的进步。",
-                        "Gapzilla records slips and the urges you controlled, so one hard day never erases the progress around it."
+                        "Gapzilla 记录破例和冲动，再根据当天结果呈现改变。一次困难，不会抹掉周围的进步。",
+                        "Gapzilla records slips and urges, then interprets each day from those facts. One hard day never erases the progress around it."
                     ))
                     .font(.body.weight(.medium))
                     .foregroundStyle(GapStyle.secondary)
