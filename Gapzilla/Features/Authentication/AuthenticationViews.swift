@@ -52,7 +52,7 @@ struct WelcomeView: View {
                         .tracking(0.7)
                         .foregroundStyle(GapStyle.coral)
 
-                    Text(store.text("别追求从不破例，\n只看间隔是否正在变长。", "Stop chasing perfection.\nWatch the gaps grow."))
+                    Text(store.text("别追求从不破例，\n只看间隔是否正在变长", "Stop chasing perfection\nWatch the gaps grow"))
                         .font(.system(size: 42, weight: .heavy, design: .rounded))
                         .tracking(-1.4)
                         .foregroundStyle(GapStyle.ink)

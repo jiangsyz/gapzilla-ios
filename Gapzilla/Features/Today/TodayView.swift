@@ -97,7 +97,6 @@ private struct CurrentGapCard: View {
             .frame(maxWidth: .infinity, alignment: .leading)
         }
         .softCard(padding: 20)
-        .clipped()
     }
 
     private var encouragement: String {

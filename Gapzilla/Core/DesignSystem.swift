@@ -48,11 +48,14 @@ struct SoftCardModifier: ViewModifier {
     var padding: CGFloat = 18
 
     func body(content: Content) -> some View {
+        let shape = RoundedRectangle(cornerRadius: 24, style: .continuous)
+
         content
             .padding(padding)
-            .background(.white.opacity(0.94), in: RoundedRectangle(cornerRadius: 24, style: .continuous))
+            .background(.white.opacity(0.94), in: shape)
+            .clipShape(shape)
             .overlay {
-                RoundedRectangle(cornerRadius: 24, style: .continuous)
+                shape
                     .stroke(GapStyle.line.opacity(0.8), lineWidth: 1)
             }
             .shadow(color: GapStyle.plum.opacity(0.07), radius: 20, y: 10)
