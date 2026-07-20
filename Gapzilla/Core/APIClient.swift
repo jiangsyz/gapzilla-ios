@@ -18,6 +18,11 @@ enum APIClientError: LocalizedError {
 
 actor APIClient {
     static let production = APIClient(baseURL: URL(string: "https://api.gapzilla.quietbase.online")!)
+#if DEBUG
+    static let app = APIClient(baseURL: URL(string: "http://localhost:8888")!)
+#else
+    static let app = production
+#endif
 
     private let baseURL: URL
     private let session: URLSession

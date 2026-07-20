@@ -39,7 +39,7 @@ final class AppStore: ObservableObject {
         static let language = "language"
     }
 
-    init(api: APIClient = .production) {
+    init(api: APIClient = .app) {
         self.api = api
         accessToken = KeychainStore.read(account: Keys.accessToken)
         refreshToken = KeychainStore.read(account: Keys.refreshToken)
