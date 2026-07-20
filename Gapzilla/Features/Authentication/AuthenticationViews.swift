@@ -1,3 +1,5 @@
+import AuthenticationServices
+import CryptoKit
 import SwiftUI
 
 enum AuthenticationMode: String, CaseIterable, Identifiable {
@@ -71,29 +73,29 @@ struct WelcomeView: View {
                     CurrentGapPreview()
                         .padding(.vertical, 28)
 
+                    AppleAuthorizationButton(purpose: .login)
+
                     Button {
-                        authMode = .register
+                        authMode = .login
                     } label: {
-                        Text(store.text("开始记录", "Start tracking"))
+                        Text(store.text("使用 Gapzilla 账号登录", "Use a Gapzilla account"))
                             .font(.headline)
                             .frame(maxWidth: .infinity)
                             .frame(height: 54)
                             .foregroundStyle(.white)
                             .background(GapStyle.coral, in: RoundedRectangle(cornerRadius: 16, style: .continuous))
                     }
+                    .padding(.top, 10)
 
                     Button {
-                        authMode = .login
+                        authMode = .register
                     } label: {
-                        Text(store.text("已有账号，去登录", "I already have an account"))
-                            .font(.headline)
+                        Text(store.text("注册用户名密码账号", "Create a username account"))
+                            .font(.subheadline.weight(.semibold))
+                            .foregroundStyle(GapStyle.secondary)
                             .frame(maxWidth: .infinity)
-                            .frame(height: 52)
-                            .foregroundStyle(GapStyle.ink)
-                            .background(.white, in: RoundedRectangle(cornerRadius: 16, style: .continuous))
-                            .overlay { RoundedRectangle(cornerRadius: 16).stroke(GapStyle.line) }
+                            .padding(.vertical, 11)
                     }
-                    .padding(.top, 10)
 
                     Label(
                         store.text("一次破例是一条数据，不是一次判决。", "A slip is a data point, not a verdict."),
@@ -113,6 +115,268 @@ struct WelcomeView: View {
         .sheet(item: $authMode) { mode in
             AuthenticationView(mode: mode)
         }
+        .sheet(item: $store.appleAccountChoice) { choice in
+            AppleAccountChoiceView(choice: choice)
+        }
+    }
+}
+
+enum AppleAuthorizationPurpose {
+    case login
+    case bind
+}
+
+struct AppleAuthorizationButton: View {
+    @EnvironmentObject private var store: AppStore
+    let purpose: AppleAuthorizationPurpose
+    @State private var rawNonce = ""
+
+    var body: some View {
+        SignInWithAppleButton(.continue) { request in
+            let nonce = AppleNonce.make()
+            rawNonce = nonce
+            request.requestedScopes = [.fullName, .email]
+            request.nonce = AppleNonce.sha256(nonce)
+        } onCompletion: { result in
+            switch result {
+            case let .success(authorization):
+                complete(authorization)
+            case let .failure(error):
+                guard !isCancellation(error) else { return }
+                store.reportAppleAuthorizationFailure(error)
+            }
+        }
+        .signInWithAppleButtonStyle(.whiteOutline)
+        .frame(maxWidth: .infinity)
+        .frame(height: 54)
+        .clipShape(RoundedRectangle(cornerRadius: 16, style: .continuous))
+        .disabled(store.isBusy)
+    }
+
+    private func complete(_ authorization: ASAuthorization) {
+        guard let appleID = authorization.credential as? ASAuthorizationAppleIDCredential,
+              let identityData = appleID.identityToken,
+              let identityToken = String(data: identityData, encoding: .utf8),
+              let codeData = appleID.authorizationCode,
+              let authorizationCode = String(data: codeData, encoding: .utf8),
+              !rawNonce.isEmpty else {
+            store.reportAppleAuthorizationFailure(AppleAuthorizationError.invalidCredential)
+            return
+        }
+        let formatter = PersonNameComponentsFormatter()
+        let fullName = appleID.fullName.map { formatter.string(from: $0) } ?? ""
+        let credential = AppleCredential(
+            identityToken: identityToken,
+            authorizationCode: authorizationCode,
+            nonce: rawNonce,
+            fullName: fullName
+        )
+        Task {
+            switch purpose {
+            case .login:
+                await store.loginWithApple(credential: credential)
+            case .bind:
+                _ = await store.bindApple(credential: credential)
+            }
+        }
+    }
+
+    private func isCancellation(_ error: Error) -> Bool {
+        guard let authorizationError = error as? ASAuthorizationError else { return false }
+        return authorizationError.code == .canceled
+    }
+}
+
+private enum AppleNonce {
+    static func make() -> String {
+        UUID().uuidString.replacingOccurrences(of: "-", with: "")
+            + UUID().uuidString.replacingOccurrences(of: "-", with: "")
+    }
+
+    static func sha256(_ value: String) -> String {
+        SHA256.hash(data: Data(value.utf8)).map { String(format: "%02x", $0) }.joined()
+    }
+}
+
+private enum AppleAuthorizationError: LocalizedError {
+    case invalidCredential
+
+    var errorDescription: String? {
+        switch self {
+        case .invalidCredential:
+            "Apple 没有返回完整的登录凭证，请重试。"
+        }
+    }
+}
+
+private enum AppleAccountChoiceStep {
+    case prompt
+    case existing
+    case newAccount
+}
+
+struct AppleAccountChoiceView: View {
+    @EnvironmentObject private var store: AppStore
+    @Environment(\.dismiss) private var dismiss
+    let choice: AppleAccountChoice
+    @State private var step: AppleAccountChoiceStep = .prompt
+    @State private var username = ""
+    @State private var password = ""
+    @State private var nickname: String
+
+    init(choice: AppleAccountChoice) {
+        self.choice = choice
+        _nickname = State(initialValue: choice.suggestedNickname)
+    }
+
+    var body: some View {
+        NavigationStack {
+            ZStack {
+                GlowBackground()
+                ScrollView {
+                    VStack(alignment: .leading, spacing: 22) {
+                        Image(systemName: "apple.logo")
+                            .font(.system(size: 38, weight: .semibold))
+                            .foregroundStyle(GapStyle.ink)
+                        content
+                    }
+                    .padding(24)
+                }
+            }
+            .toolbar {
+                ToolbarItem(placement: .cancellationAction) {
+                    Button(store.text("取消", "Cancel")) {
+                        store.cancelAppleAccountChoice()
+                        dismiss()
+                    }
+                }
+            }
+        }
+        .interactiveDismissDisabled(store.isBusy)
+        .presentationDetents([.large])
+    }
+
+    @ViewBuilder
+    private var content: some View {
+        switch step {
+        case .prompt:
+            prompt
+        case .existing:
+            existingAccount
+        case .newAccount:
+            newAccount
+        }
+    }
+
+    private var prompt: some View {
+        VStack(alignment: .leading, spacing: 18) {
+            SectionTitle(
+                store.text("第一次使用 Apple 登录", "First time signing in with Apple"),
+                subtitle: store.text(
+                    "你已经有 Gapzilla 账号吗？选择后我们才会继续，不会自动创建或合并账号。",
+                    "Do you already have a Gapzilla account? We will continue only after you choose—no account is created or merged automatically."
+                )
+            )
+            choiceButton(
+                title: store.text("绑定已有账号", "Link an existing account"),
+                subtitle: store.text("保留原来的目标、记录和统计", "Keep your existing goals, records, and insights"),
+                icon: "person.crop.circle.badge.checkmark"
+            ) { step = .existing }
+            choiceButton(
+                title: store.text("创建新账号", "Create a new account"),
+                subtitle: store.text("这是第一次使用 Gapzilla", "This is my first time using Gapzilla"),
+                icon: "person.crop.circle.badge.plus"
+            ) { step = .newAccount }
+        }
+    }
+
+    private var existingAccount: some View {
+        VStack(alignment: .leading, spacing: 18) {
+            backButton
+            SectionTitle(
+                store.text("绑定已有账号", "Link your existing account"),
+                subtitle: store.text("验证用户名和密码后，Apple 会成为同一账号的新登录方式。", "After your password is verified, Apple becomes another way to enter the same account.")
+            )
+            InputField(title: store.text("用户名", "Username"), icon: "person", text: $username)
+                .textInputAutocapitalization(.never)
+                .autocorrectionDisabled()
+            SecureInputField(title: store.text("密码", "Password"), text: $password)
+            primaryButton(store.text("验证并绑定", "Verify and link"), disabled: username.isEmpty || password.isEmpty) {
+                Task {
+                    _ = await store.linkAppleToExistingAccount(
+                        choice: choice,
+                        username: username,
+                        password: password
+                    )
+                }
+            }
+        }
+    }
+
+    private var newAccount: some View {
+        VStack(alignment: .leading, spacing: 18) {
+            backButton
+            SectionTitle(
+                store.text("创建新账号", "Create a new account"),
+                subtitle: store.text("只需要一个显示昵称，不会强迫你再设置用户名和密码。", "Choose a display name. You do not need to create a username and password.")
+            )
+            InputField(title: store.text("昵称", "Nickname"), icon: "face.smiling", text: $nickname)
+            primaryButton(store.text("创建并继续", "Create and continue"), disabled: nickname.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty) {
+                Task { _ = await store.createAppleAccount(choice: choice, nickname: nickname) }
+            }
+        }
+    }
+
+    private var backButton: some View {
+        Button {
+            step = .prompt
+        } label: {
+            Label(store.text("返回选择", "Back to choices"), systemImage: "chevron.left")
+                .font(.subheadline.weight(.semibold))
+                .foregroundStyle(GapStyle.secondary)
+        }
+    }
+
+    private func choiceButton(
+        title: String,
+        subtitle: String,
+        icon: String,
+        action: @escaping () -> Void
+    ) -> some View {
+        Button(action: action) {
+            HStack(spacing: 14) {
+                Image(systemName: icon)
+                    .font(.title3.weight(.semibold))
+                    .foregroundStyle(GapStyle.coral)
+                    .frame(width: 44, height: 44)
+                    .background(GapStyle.coralSoft, in: Circle())
+                VStack(alignment: .leading, spacing: 4) {
+                    Text(title).font(.headline).foregroundStyle(GapStyle.ink)
+                    Text(subtitle).font(.subheadline).foregroundStyle(GapStyle.secondary)
+                }
+                Spacer()
+                Image(systemName: "chevron.right").foregroundStyle(GapStyle.secondary)
+            }
+            .padding(16)
+            .background(.white, in: RoundedRectangle(cornerRadius: 18, style: .continuous))
+            .overlay { RoundedRectangle(cornerRadius: 18).stroke(GapStyle.line) }
+        }
+        .buttonStyle(.plain)
+    }
+
+    private func primaryButton(_ title: String, disabled: Bool, action: @escaping () -> Void) -> some View {
+        Button(action: action) {
+            HStack {
+                if store.isBusy { ProgressView().tint(.white) }
+                Text(title)
+            }
+            .font(.headline)
+            .frame(maxWidth: .infinity)
+            .frame(height: 54)
+            .foregroundStyle(.white)
+            .background(GapStyle.coral, in: RoundedRectangle(cornerRadius: 16, style: .continuous))
+        }
+        .disabled(disabled || store.isBusy)
     }
 }
 

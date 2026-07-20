@@ -174,9 +174,11 @@ struct AccountSheet: View {
                         LogoMark(size: 44)
                         VStack(alignment: .leading, spacing: 3) {
                             Text(store.user?.nickname ?? "Gapzilla").font(.headline)
-                            Text("@\(store.user?.username ?? "")")
-                                .font(.subheadline)
-                                .foregroundStyle(GapStyle.secondary)
+                            if let username = store.user?.username, !username.isEmpty {
+                                Text("@\(username)")
+                                    .font(.subheadline)
+                                    .foregroundStyle(GapStyle.secondary)
+                            }
                         }
                     }
                     .padding(.vertical, 5)
@@ -188,6 +190,29 @@ struct AccountSheet: View {
                         Text("English").tag(AppLanguage.english)
                     }
                     .pickerStyle(.segmented)
+                }
+
+                Section(store.text("登录方式", "Sign-in methods")) {
+                    loginMethodRow(
+                        store.text("用户名和密码", "Username and password"),
+                        systemImage: "key.fill",
+                        isLinked: hasPasswordLogin
+                    )
+                    loginMethodRow(
+                        store.text("Apple 登录", "Sign in with Apple"),
+                        systemImage: "apple.logo",
+                        isLinked: hasAppleLogin
+                    )
+                    if !hasAppleLogin {
+                        VStack(alignment: .leading, spacing: 8) {
+                            Text(store.text("绑定后，你可以用 Apple 进入当前账号和原有数据。", "Link Apple to enter this account and its existing data."))
+                                .font(.caption)
+                                .foregroundStyle(GapStyle.secondary)
+                            AppleAuthorizationButton(purpose: .bind)
+                                .frame(height: 46)
+                        }
+                        .padding(.vertical, 4)
+                    }
                 }
 
                 Section {
@@ -207,6 +232,24 @@ struct AccountSheet: View {
                     Button(store.text("完成", "Done")) { dismiss() }
                 }
             }
+        }
+    }
+
+    private var hasPasswordLogin: Bool {
+        store.user?.loginProviders.contains("password") == true || !(store.user?.username ?? "").isEmpty
+    }
+
+    private var hasAppleLogin: Bool {
+        store.user?.loginProviders.contains("apple") == true
+    }
+
+    private func loginMethodRow(_ title: String, systemImage: String, isLinked: Bool) -> some View {
+        HStack {
+            Label(title, systemImage: systemImage)
+            Spacer()
+            Text(isLinked ? store.text("已绑定", "Linked") : store.text("未绑定", "Not linked"))
+                .font(.caption.weight(.semibold))
+                .foregroundStyle(isLinked ? GapStyle.coral : GapStyle.secondary)
         }
     }
 }

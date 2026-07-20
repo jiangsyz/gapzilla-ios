@@ -20,6 +20,7 @@
 		A1000000000000000000000C /* InsightsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B1000000000000000000000C /* InsightsView.swift */; };
 		A1000000000000000000000D /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = B1000000000000000000000D /* Assets.xcassets */; };
 		A1000000000000000000000E /* GoalMetricsTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = B1000000000000000000000F /* GoalMetricsTests.swift */; };
+		A1000000000000000000000F /* APIClientTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = B10000000000000000000011 /* APIClientTests.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -39,6 +40,7 @@
 		B1000000000000000000000E /* Gapzilla.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Gapzilla.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		B1000000000000000000000F /* GoalMetricsTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GapzillaTests/GoalMetricsTests.swift; sourceTree = "<group>"; };
 		B10000000000000000000010 /* GapzillaTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = GapzillaTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		B10000000000000000000011 /* APIClientTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GapzillaTests/APIClientTests.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXContainerItemProxy section */
@@ -101,6 +103,7 @@
 			isa = PBXGroup;
 			children = (
 				B1000000000000000000000F /* GoalMetricsTests.swift */,
+				B10000000000000000000011 /* APIClientTests.swift */,
 			);
 			name = GapzillaTests;
 			sourceTree = "<group>";
@@ -150,7 +153,12 @@
 				LastSwiftUpdateCheck = 2620;
 				LastUpgradeCheck = 2620;
 				TargetAttributes = {
-					E10000000000000000000001 = { CreatedOnToolsVersion = 26.2; };
+					E10000000000000000000001 = {
+						CreatedOnToolsVersion = 26.2;
+						SystemCapabilities = {
+							com.apple.SignInWithApple = { enabled = 1; };
+						};
+					};
 					E10000000000000000000003 = { CreatedOnToolsVersion = 26.2; TestTargetID = E10000000000000000000001; };
 				};
 			};
@@ -210,6 +218,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				A1000000000000000000000E /* GoalMetricsTests.swift in Sources */,
+				A1000000000000000000000F /* APIClientTests.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -261,16 +270,13 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_ENTITLEMENTS = Gapzilla/Gapzilla.entitlements;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_TEAM = 2ZJ9P9Y7U3;
 				DEVELOPMENT_ASSET_PATHS = "";
-				GENERATE_INFOPLIST_FILE = YES;
-				INFOPLIST_KEY_CFBundleDisplayName = Gapzilla;
-				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.healthcare-fitness";
-				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
-				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
-				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
+				GENERATE_INFOPLIST_FILE = NO;
+				INFOPLIST_FILE = Gapzilla/Info-Debug.plist;
 				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
 				MARKETING_VERSION = 1.0;
 				PRODUCT_BUNDLE_IDENTIFIER = online.quietbase.gapzilla;
@@ -287,6 +293,7 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_ENTITLEMENTS = Gapzilla/Gapzilla.entitlements;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_TEAM = 2ZJ9P9Y7U3;
