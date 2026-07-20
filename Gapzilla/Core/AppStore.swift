@@ -23,6 +23,7 @@ final class AppStore: ObservableObject {
     @Published var events: [GoalEvent] = []
     @Published var isBusy = false
     @Published var errorMessage: String?
+    @Published var appleAccountChoice: AppleAccountChoice?
     @Published var language: AppLanguage {
         didSet { UserDefaults.standard.set(language.rawValue, forKey: Keys.language) }
     }
@@ -112,6 +113,86 @@ final class AppStore: ObservableObject {
         }
     }
 
+    func loginWithApple(credential: AppleCredential) async {
+        isBusy = true
+        errorMessage = nil
+        defer { isBusy = false }
+        do {
+            let data: AppleLoginData = try await api.post(
+                "/api/v1/auth/apple/login",
+                body: AppleLoginPayload(
+                    credential: credential,
+                    device: DevicePayload(deviceName: UIDevice.current.name)
+                )
+            )
+            switch data.status {
+            case .authenticated:
+                try await finishAuthentication(AuthData(user: data.user, tokens: data.tokens))
+            case .accountChoiceRequired:
+                appleAccountChoice = AppleAccountChoice(
+                    pendingToken: data.pendingToken,
+                    suggestedNickname: data.suggestedNickname,
+                    credential: credential
+                )
+            }
+        } catch {
+            handle(error)
+        }
+    }
+
+    func linkAppleToExistingAccount(
+        choice: AppleAccountChoice,
+        username: String,
+        password: String
+    ) async -> Bool {
+        await completeAppleAccountChoice {
+            try await api.post(
+                "/api/v1/auth/apple/link-existing",
+                body: AppleLinkExistingPayload(
+                    pendingToken: choice.pendingToken,
+                    credential: choice.credential,
+                    username: username,
+                    password: password,
+                    device: DevicePayload(deviceName: UIDevice.current.name)
+                )
+            )
+        }
+    }
+
+    func createAppleAccount(choice: AppleAccountChoice, nickname: String) async -> Bool {
+        await completeAppleAccountChoice {
+            try await api.post(
+                "/api/v1/auth/apple/create-account",
+                body: AppleCreateAccountPayload(
+                    pendingToken: choice.pendingToken,
+                    credential: choice.credential,
+                    nickname: nickname,
+                    device: DevicePayload(deviceName: UIDevice.current.name)
+                )
+            )
+        }
+    }
+
+    func bindApple(credential: AppleCredential) async -> Bool {
+        await performMutation {
+            let data: UserData = try await authenticated {
+                try await api.post(
+                    "/api/v1/users/me/auth-identities/apple",
+                    body: AppleBindPayload(credential: credential)
+                )
+            }
+            user = data.user
+        }
+    }
+
+    func cancelAppleAccountChoice() {
+        appleAccountChoice = nil
+    }
+
+    func reportAppleAuthorizationFailure(_ error: Error) {
+        errorMessage = error.localizedDescription
+    }
+
     func logout() async {
         if let refreshToken {
             let _: LogoutData? = try? await api.post(
@@ -119,6 +200,7 @@ final class AppStore: ObservableObject {
                 body: RefreshPayload(refreshToken: refreshToken)
             )
         }
+        appleAccountChoice = nil
         clearSession()
         phase = .signedOut
     }
@@ -199,16 +281,35 @@ final class AppStore: ObservableObject {
         defer { isBusy = false }
         do {
             let auth = try await operation()
-            user = auth.user
-            await store(tokens: auth.tokens)
-            try await loadGoals()
-            try await loadEvents()
-            phase = .signedIn
+            try await finishAuthentication(auth)
             return true
         } catch {
             handle(error)
             return false
         }
+    }
+
+    private func completeAppleAccountChoice(operation: () async throws -> AuthData) async -> Bool {
+        isBusy = true
+        errorMessage = nil
+        defer { isBusy = false }
+        do {
+            let auth = try await operation()
+            try await finishAuthentication(auth)
+            appleAccountChoice = nil
+            return true
+        } catch {
+            handle(error)
+            return false
+        }
+    }
+
+    private func finishAuthentication(_ auth: AuthData) async throws {
+        user = auth.user
+        await store(tokens: auth.tokens)
+        try await loadGoals()
+        try await loadEvents()
+        phase = .signedIn
     }
 
     private func performMutation(operation: () async throws -> Void) async -> Bool {
@@ -319,6 +420,20 @@ final class AppStore: ObservableObject {
 #if DEBUG
 private extension AppStore {
     func applyDebugPreviewIfNeeded() {
+        if ProcessInfo.processInfo.arguments.contains("--ui-preview-apple-choice") {
+            phase = .signedOut
+            appleAccountChoice = AppleAccountChoice(
+                pendingToken: "preview-pending-token",
+                suggestedNickname: "Apple User",
+                credential: AppleCredential(
+                    identityToken: "preview-identity-token",
+                    authorizationCode: "preview-authorization-code",
+                    nonce: "preview-nonce",
+                    fullName: "Apple User"
+                )
+            )
+            return
+        }
         guard ProcessInfo.processInfo.arguments.contains("--ui-preview-signed-in") else { return }
 
         let now = Date()

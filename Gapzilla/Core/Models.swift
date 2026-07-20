@@ -12,6 +12,33 @@ struct User: Codable, Equatable {
     let username: String
     let nickname: String
     let avatarUrl: String
+    let loginProviders: [String]
+
+    init(
+        id: String,
+        userNo: String,
+        username: String,
+        nickname: String,
+        avatarUrl: String,
+        loginProviders: [String] = []
+    ) {
+        self.id = id
+        self.userNo = userNo
+        self.username = username
+        self.nickname = nickname
+        self.avatarUrl = avatarUrl
+        self.loginProviders = loginProviders
+    }
+
+    init(from decoder: Decoder) throws {
+        let container = try decoder.container(keyedBy: CodingKeys.self)
+        id = try container.decode(String.self, forKey: .id)
+        userNo = try container.decode(String.self, forKey: .userNo)
+        username = try container.decode(String.self, forKey: .username)
+        nickname = try container.decode(String.self, forKey: .nickname)
+        avatarUrl = try container.decode(String.self, forKey: .avatarUrl)
+        loginProviders = try container.decodeIfPresent([String].self, forKey: .loginProviders) ?? []
+    }
 }
 
 struct Tokens: Codable, Equatable {
@@ -26,6 +53,33 @@ struct Tokens: Codable, Equatable {
 struct AuthData: Decodable {
     let user: User
     let tokens: Tokens
+}
+
+enum AppleLoginStatus: String, Decodable {
+    case authenticated
+    case accountChoiceRequired = "account_choice_required"
+}
+
+struct AppleCredential: Codable, Equatable {
+    let identityToken: String
+    let authorizationCode: String
+    let nonce: String
+    let fullName: String
+}
+
+struct AppleLoginData: Decodable {
+    let status: AppleLoginStatus
+    let pendingToken: String
+    let suggestedNickname: String
+    let user: User
+    let tokens: Tokens
+}
+
+struct AppleAccountChoice: Identifiable, Equatable {
+    let id = UUID()
+    let pendingToken: String
+    let suggestedNickname: String
+    let credential: AppleCredential
 }
 
 struct TokensData: Decodable {
@@ -115,6 +169,30 @@ struct RegisterPayload: Encodable {
     let password: String
     let nickname: String
     let device: DevicePayload
+}
+
+struct AppleLoginPayload: Encodable {
+    let credential: AppleCredential
+    let device: DevicePayload
+}
+
+struct AppleLinkExistingPayload: Encodable {
+    let pendingToken: String
+    let credential: AppleCredential
+    let username: String
+    let password: String
+    let device: DevicePayload
+}
+
+struct AppleCreateAccountPayload: Encodable {
+    let pendingToken: String
+    let credential: AppleCredential
+    let nickname: String
+    let device: DevicePayload
+}
+
+struct AppleBindPayload: Encodable {
+    let credential: AppleCredential
 }
 
 struct RefreshPayload: Encodable { let refreshToken: String }
