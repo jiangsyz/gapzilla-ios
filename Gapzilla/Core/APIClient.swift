@@ -1,5 +1,10 @@
 import Foundation
 
+private struct APIResponseStatus: Decodable {
+    let code: Int
+    let message: String
+}
+
 enum APIClientError: LocalizedError {
     case invalidResponse
     case unauthorized
@@ -85,10 +90,11 @@ actor APIClient {
             let (data, response) = try await session.data(for: request)
             guard let http = response as? HTTPURLResponse else { throw APIClientError.invalidResponse }
             if http.statusCode == 401 { throw APIClientError.unauthorized }
-            let envelope = try decoder.decode(APIEnvelope<Value>.self, from: data)
-            guard envelope.code == 0 else {
-                throw APIClientError.server(code: envelope.code, message: envelope.message)
+            let status = try decoder.decode(APIResponseStatus.self, from: data)
+            guard status.code == 0 else {
+                throw APIClientError.server(code: status.code, message: status.message)
             }
+            let envelope = try decoder.decode(APIEnvelope<Value>.self, from: data)
             return envelope.data
         } catch let error as APIClientError {
             throw error

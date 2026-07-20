@@ -20,6 +20,7 @@
 		A1000000000000000000000C /* InsightsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B1000000000000000000000C /* InsightsView.swift */; };
 		A1000000000000000000000D /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = B1000000000000000000000D /* Assets.xcassets */; };
 		A1000000000000000000000E /* GoalMetricsTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = B1000000000000000000000F /* GoalMetricsTests.swift */; };
+		A1000000000000000000000F /* APIClientTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = B10000000000000000000011 /* APIClientTests.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -39,6 +40,7 @@
 		B1000000000000000000000E /* Gapzilla.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Gapzilla.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		B1000000000000000000000F /* GoalMetricsTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GapzillaTests/GoalMetricsTests.swift; sourceTree = "<group>"; };
 		B10000000000000000000010 /* GapzillaTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = GapzillaTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		B10000000000000000000011 /* APIClientTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GapzillaTests/APIClientTests.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXContainerItemProxy section */
@@ -101,6 +103,7 @@
 			isa = PBXGroup;
 			children = (
 				B1000000000000000000000F /* GoalMetricsTests.swift */,
+				B10000000000000000000011 /* APIClientTests.swift */,
 			);
 			name = GapzillaTests;
 			sourceTree = "<group>";
@@ -215,6 +218,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				A1000000000000000000000E /* GoalMetricsTests.swift in Sources */,
+				A1000000000000000000000F /* APIClientTests.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
