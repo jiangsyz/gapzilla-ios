@@ -111,7 +111,31 @@ struct WelcomeView: View {
                 .padding(.horizontal, 22)
                 .padding(.top, 18)
             }
+
+            if store.isBusy {
+                Color.white.opacity(0.72)
+                    .ignoresSafeArea()
+
+                VStack(spacing: 12) {
+                    ProgressView()
+                        .controlSize(.large)
+                        .tint(GapStyle.coral)
+                    Text(store.text("正在登录…", "Signing in…"))
+                        .font(.headline)
+                        .foregroundStyle(GapStyle.ink)
+                }
+                .padding(.horizontal, 28)
+                .padding(.vertical, 22)
+                .background(.ultraThinMaterial, in: RoundedRectangle(cornerRadius: 22, style: .continuous))
+                .overlay {
+                    RoundedRectangle(cornerRadius: 22, style: .continuous)
+                        .stroke(GapStyle.line, lineWidth: 1)
+                }
+                .shadow(color: GapStyle.ink.opacity(0.08), radius: 22, y: 10)
+                .transition(.opacity)
+            }
         }
+        .animation(.easeOut(duration: 0.16), value: store.isBusy)
         .sheet(item: $authMode) { mode in
             AuthenticationView(mode: mode)
         }
@@ -175,11 +199,14 @@ struct AppleAuthorizationButton: View {
             nonce: rawNonce,
             fullName: fullName
         )
-        Task {
-            switch purpose {
-            case .login:
+        switch purpose {
+        case .login:
+            store.beginAppleLoginCompletion()
+            Task {
                 await store.loginWithApple(credential: credential)
-            case .bind:
+            }
+        case .bind:
+            Task {
                 _ = await store.bindApple(credential: credential)
             }
         }

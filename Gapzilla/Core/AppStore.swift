@@ -140,6 +140,11 @@ final class AppStore: ObservableObject {
         }
     }
 
+    func beginAppleLoginCompletion() {
+        errorMessage = nil
+        isBusy = true
+    }
+
     func linkAppleToExistingAccount(
         choice: AppleAccountChoice,
         username: String,
@@ -420,6 +425,11 @@ final class AppStore: ObservableObject {
 #if DEBUG
 private extension AppStore {
     func applyDebugPreviewIfNeeded() {
+        if ProcessInfo.processInfo.arguments.contains("--ui-preview-apple-loading") {
+            phase = .signedOut
+            isBusy = true
+            return
+        }
         if ProcessInfo.processInfo.arguments.contains("--ui-preview-apple-choice") {
             phase = .signedOut
             appleAccountChoice = AppleAccountChoice(
