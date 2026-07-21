@@ -24,6 +24,8 @@
 	<string>public.app-category.healthcare-fitness</string>
 	<key>LSRequiresIPhoneOS</key>
 	<true/>
+	<key>ITSAppUsesNonExemptEncryption</key>
+	<false/>
 	<key>NSAccentColorName</key>
 	<string>AccentColor</string>
 	<key>NSAppTransportSecurity</key>

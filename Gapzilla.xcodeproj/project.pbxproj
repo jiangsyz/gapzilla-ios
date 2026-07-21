@@ -21,6 +21,7 @@
 		A1000000000000000000000D /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = B1000000000000000000000D /* Assets.xcassets */; };
 		A1000000000000000000000E /* GoalMetricsTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = B1000000000000000000000F /* GoalMetricsTests.swift */; };
 		A1000000000000000000000F /* APIClientTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = B10000000000000000000011 /* APIClientTests.swift */; };
+		A10000000000000000000010 /* Localizable.strings in Resources */ = {isa = PBXBuildFile; fileRef = H10000000000000000000001 /* Localizable.strings */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -41,6 +42,8 @@
 		B1000000000000000000000F /* GoalMetricsTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GapzillaTests/GoalMetricsTests.swift; sourceTree = "<group>"; };
 		B10000000000000000000010 /* GapzillaTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = GapzillaTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		B10000000000000000000011 /* APIClientTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GapzillaTests/APIClientTests.swift; sourceTree = "<group>"; };
+		B10000000000000000000012 /* en */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = en; path = Gapzilla/Resources/en.lproj/Localizable.strings; sourceTree = "<group>"; };
+		B10000000000000000000013 /* zh-Hans */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = "zh-Hans"; path = "Gapzilla/Resources/zh-Hans.lproj/Localizable.strings"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXContainerItemProxy section */
@@ -85,6 +88,7 @@
 				B1000000000000000000000B /* HistoryView.swift */,
 				B1000000000000000000000C /* InsightsView.swift */,
 				B1000000000000000000000D /* Assets.xcassets */,
+				H10000000000000000000001 /* Localizable.strings */,
 				D10000000000000000000003 /* GapzillaTests */,
 				D10000000000000000000002 /* Products */,
 			);
@@ -166,7 +170,7 @@
 			compatibilityVersion = "Xcode 14.0";
 			developmentRegion = en;
 			hasScannedForEncodings = 0;
-			knownRegions = (en, Base);
+			knownRegions = (en, "zh-Hans", Base);
 			mainGroup = D10000000000000000000001;
 			productRefGroup = D10000000000000000000002 /* Products */;
 			projectDirPath = "";
@@ -182,7 +186,10 @@
 		C10000000000000000000003 /* Resources */ = {
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
-			files = (A1000000000000000000000D /* Assets.xcassets in Resources */);
+			files = (
+				A1000000000000000000000D /* Assets.xcassets in Resources */,
+				A10000000000000000000010 /* Localizable.strings in Resources */,
+			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 		C10000000000000000000006 /* Resources */ = {
@@ -272,7 +279,7 @@
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGN_ENTITLEMENTS = Gapzilla/Gapzilla.entitlements;
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 1;
+				CURRENT_PROJECT_VERSION = 2;
 				DEVELOPMENT_TEAM = 2ZJ9P9Y7U3;
 				DEVELOPMENT_ASSET_PATHS = "";
 				GENERATE_INFOPLIST_FILE = NO;
@@ -295,11 +302,12 @@
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGN_ENTITLEMENTS = Gapzilla/Gapzilla.entitlements;
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 1;
+				CURRENT_PROJECT_VERSION = 2;
 				DEVELOPMENT_TEAM = 2ZJ9P9Y7U3;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_KEY_CFBundleDisplayName = Gapzilla;
 				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.healthcare-fitness";
+				INFOPLIST_KEY_ITSAppUsesNonExemptEncryption = NO;
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
@@ -382,6 +390,18 @@
 			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
+
+/* Begin PBXVariantGroup section */
+		H10000000000000000000001 /* Localizable.strings */ = {
+			isa = PBXVariantGroup;
+			children = (
+				B10000000000000000000012 /* en */,
+				B10000000000000000000013 /* zh-Hans */,
+			);
+			name = Localizable.strings;
+			sourceTree = "<group>";
+		};
+/* End PBXVariantGroup section */
 	};
 	rootObject = E10000000000000000000002 /* Project object */;
 }

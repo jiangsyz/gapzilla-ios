@@ -146,10 +146,14 @@ struct AppleAuthorizationButton: View {
                 store.reportAppleAuthorizationFailure(error)
             }
         }
-        .signInWithAppleButtonStyle(.whiteOutline)
+        .signInWithAppleButtonStyle(.white)
         .frame(maxWidth: .infinity)
         .frame(height: 54)
         .clipShape(RoundedRectangle(cornerRadius: 16, style: .continuous))
+        .overlay {
+            RoundedRectangle(cornerRadius: 16, style: .continuous)
+                .stroke(GapStyle.line, lineWidth: 1)
+        }
         .disabled(store.isBusy)
     }
 
