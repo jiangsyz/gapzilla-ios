@@ -165,6 +165,7 @@ struct GoalManagerSheet: View {
 struct AccountSheet: View {
     @EnvironmentObject private var store: AppStore
     @Environment(\.dismiss) private var dismiss
+    @State private var presentsDeleteAccount = false
 
     var body: some View {
         NavigationStack {
@@ -216,6 +217,15 @@ struct AccountSheet: View {
                 }
 
                 Section {
+                    Link(destination: URL(string: "https://gapzilla.quietbase.online/privacy")!) {
+                        Label(store.text("隐私政策", "Privacy Policy"), systemImage: "hand.raised.fill")
+                    }
+                    Link(destination: URL(string: "https://gapzilla.quietbase.online/support")!) {
+                        Label(store.text("支持与帮助", "Support"), systemImage: "questionmark.circle.fill")
+                    }
+                }
+
+                Section {
                     Button(role: .destructive) {
                         Task {
                             dismiss()
@@ -224,6 +234,12 @@ struct AccountSheet: View {
                     } label: {
                         Label(store.text("退出登录", "Log out"), systemImage: "rectangle.portrait.and.arrow.right")
                     }
+
+                    Button(role: .destructive) {
+                        presentsDeleteAccount = true
+                    } label: {
+                        Label(store.text("注销账号", "Delete Account"), systemImage: "person.crop.circle.badge.minus")
+                    }
                 }
             }
             .navigationTitle(store.text("账号", "Account"))
@@ -231,6 +247,9 @@ struct AccountSheet: View {
                 ToolbarItem(placement: .confirmationAction) {
                     Button(store.text("完成", "Done")) { dismiss() }
                 }
+            }
+            .sheet(isPresented: $presentsDeleteAccount) {
+                DeleteAccountSheet(requiresAppleAuthorization: hasAppleLogin)
             }
         }
     }
@@ -250,6 +269,107 @@ struct AccountSheet: View {
             Text(isLinked ? store.text("已绑定", "Linked") : store.text("未绑定", "Not linked"))
                 .font(.caption.weight(.semibold))
                 .foregroundStyle(isLinked ? GapStyle.coral : GapStyle.secondary)
+        }
+    }
+}
+
+private struct DeleteAccountSheet: View {
+    @EnvironmentObject private var store: AppStore
+    @Environment(\.dismiss) private var dismiss
+    let requiresAppleAuthorization: Bool
+    @State private var showsConfirmation = false
+    @State private var awaitsAppleAuthorization = false
+
+    var body: some View {
+        NavigationStack {
+            List {
+                Section {
+                    VStack(alignment: .leading, spacing: 14) {
+                        Image(systemName: "exclamationmark.triangle.fill")
+                            .font(.system(size: 30, weight: .semibold))
+                            .foregroundStyle(GapStyle.coral)
+                        Text(store.text("注销后无法恢复", "Deletion cannot be undone"))
+                            .font(.title3.bold())
+                            .foregroundStyle(GapStyle.ink)
+                        Text(store.text(
+                            "你的账号、全部目标、破例和冲动记录以及登录会话都会被永久删除。",
+                            "Your account, goals, slip and urge records, and sign-in sessions will be permanently deleted."
+                        ))
+                        .font(.body)
+                        .foregroundStyle(GapStyle.secondary)
+                    }
+                    .padding(.vertical, 8)
+                }
+
+                if awaitsAppleAuthorization {
+                    Section {
+                        Text(store.text(
+                            "请使用 Apple 再验证一次。验证成功后，账号会立即永久删除。",
+                            "Authenticate with Apple once more. Your account will be permanently deleted immediately after verification."
+                        ))
+                        .font(.subheadline)
+                        .foregroundStyle(GapStyle.secondary)
+
+                        AppleAuthorizationButton(purpose: .deleteAccount)
+                            .frame(height: 50)
+                    } header: {
+                        Text(store.text("最后一步", "Final step"))
+                    }
+                } else {
+                    Section {
+                        Button(role: .destructive) {
+                            showsConfirmation = true
+                        } label: {
+                            Text(store.text("继续注销账号", "Continue to delete account"))
+                                .font(.headline)
+                                .frame(maxWidth: .infinity)
+                        }
+                        .disabled(store.isBusy)
+                    }
+                }
+
+                Section {
+                    Text(store.text(
+                        "如果你只是暂时不想使用 Gapzilla，可以返回账号页选择退出登录。",
+                        "If you only want to stop using Gapzilla for now, return to the account page and log out instead."
+                    ))
+                    .font(.footnote)
+                    .foregroundStyle(GapStyle.secondary)
+                }
+            }
+            .navigationTitle(store.text("注销账号", "Delete Account"))
+            .toolbar {
+                ToolbarItem(placement: .cancellationAction) {
+                    Button(store.text("取消", "Cancel")) { dismiss() }
+                }
+            }
+            .confirmationDialog(
+                store.text("永久删除账号和全部数据？", "Permanently delete your account and all data?"),
+                isPresented: $showsConfirmation,
+                titleVisibility: .visible
+            ) {
+                Button(store.text("永久删除", "Delete Permanently"), role: .destructive) {
+                    if requiresAppleAuthorization {
+                        awaitsAppleAuthorization = true
+                    } else {
+                        Task { _ = await store.deleteAccount(credential: nil) }
+                    }
+                }
+                Button(store.text("取消", "Cancel"), role: .cancel) {}
+            } message: {
+                Text(store.text("这个操作不能撤销。", "This action cannot be undone."))
+            }
+            .overlay {
+                if store.isBusy {
+                    Color.white.opacity(0.72).ignoresSafeArea()
+                    ProgressView()
+                        .controlSize(.large)
+                        .tint(GapStyle.coral)
+                }
+            }
+            .onChange(of: store.phase) { _, phase in
+                if phase == .signedOut { dismiss() }
+            }
         }
     }
 }

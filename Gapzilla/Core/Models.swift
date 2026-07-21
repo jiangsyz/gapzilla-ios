@@ -195,6 +195,14 @@ struct AppleBindPayload: Encodable {
     let credential: AppleCredential
 }
 
+struct DeleteAccountPayload: Encodable {
+    let credential: AppleCredential?
+}
+
+struct DeleteAccountData: Decodable {
+    let deleted: Bool
+}
+
 struct RefreshPayload: Encodable { let refreshToken: String }
 struct NamePayload: Encodable { let name: String }
 struct EventPayload: Encodable {

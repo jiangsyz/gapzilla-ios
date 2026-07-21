@@ -62,6 +62,10 @@ actor APIClient {
         try await request(path, method: "DELETE", body: Optional<String>.none)
     }
 
+    func delete<Value: Decodable, Body: Encodable>(_ path: String, body: Body) async throws -> Value {
+        try await request(path, method: "DELETE", body: body)
+    }
+
     private func request<Value: Decodable, Body: Encodable>(
         _ path: String,
         method: String,
