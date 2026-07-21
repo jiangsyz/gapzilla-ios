@@ -93,7 +93,7 @@ final class AppStore: ObservableObject {
                 body: LoginPayload(
                     username: username,
                     password: password,
-                    device: DevicePayload(deviceName: UIDevice.current.name)
+                    device: DevicePayload(deviceName: UIDevice.current.model)
                 )
             )
         }
@@ -107,7 +107,7 @@ final class AppStore: ObservableObject {
                     username: username,
                     password: password,
                     nickname: nickname,
-                    device: DevicePayload(deviceName: UIDevice.current.name)
+                    device: DevicePayload(deviceName: UIDevice.current.model)
                 )
             )
         }
@@ -122,7 +122,7 @@ final class AppStore: ObservableObject {
                 "/api/v1/auth/apple/login",
                 body: AppleLoginPayload(
                     credential: credential,
-                    device: DevicePayload(deviceName: UIDevice.current.name)
+                    device: DevicePayload(deviceName: UIDevice.current.model)
                 )
             )
             switch data.status {
@@ -158,7 +158,7 @@ final class AppStore: ObservableObject {
                     credential: choice.credential,
                     username: username,
                     password: password,
-                    device: DevicePayload(deviceName: UIDevice.current.name)
+                    device: DevicePayload(deviceName: UIDevice.current.model)
                 )
             )
         }
@@ -172,7 +172,7 @@ final class AppStore: ObservableObject {
                     pendingToken: choice.pendingToken,
                     credential: choice.credential,
                     nickname: nickname,
-                    device: DevicePayload(deviceName: UIDevice.current.name)
+                    device: DevicePayload(deviceName: UIDevice.current.model)
                 )
             )
         }
@@ -208,6 +208,23 @@ final class AppStore: ObservableObject {
         appleAccountChoice = nil
         clearSession()
         phase = .signedOut
+    }
+
+    func deleteAccount(credential: AppleCredential?) async -> Bool {
+        await performMutation {
+            let data: DeleteAccountData = try await authenticated {
+                try await api.delete(
+                    "/api/v1/users/me",
+                    body: DeleteAccountPayload(credential: credential)
+                )
+            }
+            guard data.deleted else {
+                throw APIClientError.invalidResponse
+            }
+            appleAccountChoice = nil
+            clearSession()
+            phase = .signedOut
+        }
     }
 
     func refreshAll() async {
@@ -463,21 +480,21 @@ private extension AppStore {
         user = User(
             id: "preview-user",
             userNo: "u_preview",
-            username: "jiangshen",
-            nickname: "jiangshen",
+            username: "preview",
+            nickname: "示例用户",
             avatarUrl: ""
         )
         goals = [
             Goal(
                 id: "preview-goal",
-                name: "悬垂",
+                name: "减少深夜刷短视频",
                 sortOrder: 10,
                 createdAt: "",
                 updatedAt: ""
             ),
             Goal(
                 id: "preview-goal-2",
-                name: "减少深夜刷短视频",
+                name: "减少无意识零食",
                 sortOrder: 20,
                 createdAt: "",
                 updatedAt: ""

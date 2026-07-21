@@ -106,6 +106,15 @@ struct WelcomeView: View {
                     .symbolRenderingMode(.monochrome)
                     .tint(GapStyle.coral)
                     .padding(.top, 18)
+
+                    Link(
+                        store.text("隐私政策", "Privacy Policy"),
+                        destination: URL(string: "https://gapzilla.quietbase.online/privacy")!
+                    )
+                    .font(.caption.weight(.semibold))
+                    .foregroundStyle(GapStyle.secondary)
+                    .frame(maxWidth: .infinity)
+                    .padding(.top, 14)
                     .padding(.bottom, 24)
                 }
                 .padding(.horizontal, 22)
@@ -148,6 +157,7 @@ struct WelcomeView: View {
 enum AppleAuthorizationPurpose {
     case login
     case bind
+    case deleteAccount
 }
 
 struct AppleAuthorizationButton: View {
@@ -159,7 +169,7 @@ struct AppleAuthorizationButton: View {
         SignInWithAppleButton(.continue) { request in
             let nonce = AppleNonce.make()
             rawNonce = nonce
-            request.requestedScopes = [.fullName, .email]
+            request.requestedScopes = purpose == .login ? [.fullName, .email] : []
             request.nonce = AppleNonce.sha256(nonce)
         } onCompletion: { result in
             switch result {
@@ -208,6 +218,10 @@ struct AppleAuthorizationButton: View {
         case .bind:
             Task {
                 _ = await store.bindApple(credential: credential)
+            }
+        case .deleteAccount:
+            Task {
+                _ = await store.deleteAccount(credential: credential)
             }
         }
     }
