@@ -1,4 +1,5 @@
 import SwiftUI
+import UIKit
 
 struct RecordEventSheet: View {
     @EnvironmentObject private var store: AppStore
@@ -7,6 +8,11 @@ struct RecordEventSheet: View {
     @State private var date = Date()
     @State private var note = ""
     @State private var saved = false
+    @FocusState private var focusedField: Field?
+
+    private enum Field: Hashable {
+        case note
+    }
 
     init(kind: EventKind = .slip) {
         _kind = State(initialValue: kind)
@@ -46,6 +52,7 @@ struct RecordEventSheet: View {
                         axis: .vertical
                     )
                     .lineLimit(3...6)
+                    .focused($focusedField, equals: .note)
                     .onChange(of: note) { _, value in
                         if value.count > 50 { note = String(value.prefix(50)) }
                     }
@@ -64,8 +71,12 @@ struct RecordEventSheet: View {
                 }
                 .listRowBackground(GapStyle.coralSoft.opacity(0.7))
             }
+            .scrollDismissesKeyboard(.interactively)
             .scrollContentBackground(.hidden)
             .background(GlowBackground())
+            .background {
+                KeyboardDismissalInstaller(action: dismissKeyboard)
+            }
             .navigationTitle(store.text("记录一次事件", "Record an event"))
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
@@ -84,8 +95,87 @@ struct RecordEventSheet: View {
                     .fontWeight(.semibold)
                     .disabled(store.isBusy)
                 }
+                ToolbarItemGroup(placement: .keyboard) {
+                    Spacer()
+                    Button(store.text("完成", "Done")) {
+                        dismissKeyboard()
+                    }
+                    .fontWeight(.semibold)
+                }
             }
             .sensoryFeedback(.success, trigger: saved)
+        }
+    }
+
+    private func dismissKeyboard() {
+        focusedField = nil
+    }
+}
+
+private struct KeyboardDismissalInstaller: UIViewRepresentable {
+    let action: () -> Void
+
+    func makeCoordinator() -> Coordinator {
+        Coordinator(action: action)
+    }
+
+    func makeUIView(context: Context) -> UIView {
+        let view = UIView(frame: .zero)
+        view.isUserInteractionEnabled = false
+        return view
+    }
+
+    func updateUIView(_ uiView: UIView, context: Context) {
+        context.coordinator.action = action
+        DispatchQueue.main.async {
+            guard let window = uiView.window else { return }
+            context.coordinator.installIfNeeded(in: window)
+        }
+    }
+
+    static func dismantleUIView(_ uiView: UIView, coordinator: Coordinator) {
+        coordinator.uninstall()
+    }
+
+    final class Coordinator: NSObject, UIGestureRecognizerDelegate {
+        var action: () -> Void
+        private weak var installedView: UIView?
+        private lazy var tapGesture: UITapGestureRecognizer = {
+            let gesture = UITapGestureRecognizer(target: self, action: #selector(handleTap))
+            gesture.cancelsTouchesInView = false
+            gesture.delegate = self
+            return gesture
+        }()
+
+        init(action: @escaping () -> Void) {
+            self.action = action
+        }
+
+        func installIfNeeded(in view: UIView) {
+            guard installedView !== view else { return }
+            uninstall()
+            view.addGestureRecognizer(tapGesture)
+            installedView = view
+        }
+
+        func uninstall() {
+            installedView?.removeGestureRecognizer(tapGesture)
+            installedView = nil
+        }
+
+        @objc private func handleTap() {
+            action()
+        }
+
+        func gestureRecognizer(_ gestureRecognizer: UIGestureRecognizer, shouldReceive touch: UITouch) -> Bool {
+            var touchedView = touch.view
+            while let view = touchedView {
+                if view is UITextField || view is UITextView {
+                    return false
+                }
+                touchedView = view.superview
+            }
+            return true
         }
     }
 }
