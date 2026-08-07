@@ -249,7 +249,12 @@ struct GoalMetrics {
     }
 
     var controlledUrges: [GoalEvent] {
-        events.filter { $0.kind == .urge && !slipDates.contains($0.occurredOn) }
+        let startOfToday = Calendar.current.startOfDay(for: today)
+        return events.filter {
+            $0.kind == .urge
+                && $0.date < startOfToday
+                && !slipDates.contains($0.occurredOn)
+        }
     }
 
     var currentGap: Int {
@@ -273,8 +278,9 @@ struct GoalMetrics {
     var previousGap: Int? { completedGaps.last }
 
     var urgesLastSevenDays: Int {
-        let start = Calendar.current.date(byAdding: .day, value: -6, to: Calendar.current.startOfDay(for: today)) ?? today
-        return controlledUrges.filter { $0.date >= start && $0.date <= today }.count
+        let end = Calendar.current.startOfDay(for: today)
+        let start = Calendar.current.date(byAdding: .day, value: -7, to: end) ?? end
+        return controlledUrges.filter { $0.date >= start && $0.date < end }.count
     }
 
     var trend: [GapPoint] {

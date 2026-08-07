@@ -87,6 +87,7 @@ private struct InsightHeroCard: View {
 
 private struct GapTrendCard: View {
     @EnvironmentObject private var store: AppStore
+    @State private var selectedDate: Date?
 
     var body: some View {
         VStack(alignment: .leading, spacing: 16) {
@@ -102,20 +103,58 @@ private struct GapTrendCard: View {
                 )
                 .frame(height: 210)
             } else {
-                Chart(store.metrics.trend) { point in
-                    LineMark(
-                        x: .value("Date", point.date),
-                        y: .value("Days", point.days)
-                    )
-                    .lineStyle(StrokeStyle(lineWidth: 2, lineCap: .round, lineJoin: .round))
-                    .foregroundStyle(GapStyle.info)
-                    PointMark(
-                        x: .value("Date", point.date),
-                        y: .value("Days", point.days)
-                    )
-                    .symbolSize(36)
-                    .foregroundStyle(GapStyle.info)
+                Chart {
+                    ForEach(store.metrics.trend) { point in
+                        LineMark(
+                            x: .value("Date", point.date),
+                            y: .value("Days", point.days)
+                        )
+                        .lineStyle(StrokeStyle(lineWidth: 2, lineCap: .round, lineJoin: .round))
+                        .foregroundStyle(GapStyle.info)
+                        PointMark(
+                            x: .value("Date", point.date),
+                            y: .value("Days", point.days)
+                        )
+                        .symbolSize(36)
+                        .foregroundStyle(GapStyle.info)
+                    }
+
+                    if let selectedPoint {
+                        RuleMark(x: .value("Selected date", selectedPoint.date))
+                            .foregroundStyle(GapStyle.secondary.opacity(0.45))
+                            .lineStyle(StrokeStyle(lineWidth: 1, dash: [3, 3]))
+                            .annotation(position: .top, spacing: 6) {
+                                VStack(alignment: .leading, spacing: 2) {
+                                    Text(selectedPoint.date, format: chartDateFormat)
+                                        .font(.caption2)
+                                        .foregroundStyle(GapStyle.secondary)
+                                    Text("\(selectedPoint.days) \(store.text("天", "days"))")
+                                        .font(.caption.weight(.bold))
+                                        .foregroundStyle(GapStyle.ink)
+                                }
+                                .padding(.horizontal, 9)
+                                .padding(.vertical, 7)
+                                .background(
+                                    GapStyle.surface,
+                                    in: RoundedRectangle(cornerRadius: 7, style: .continuous)
+                                )
+                                .overlay {
+                                    RoundedRectangle(cornerRadius: 7, style: .continuous)
+                                        .stroke(GapStyle.line, lineWidth: 1)
+                                }
+                            }
+
+                        PointMark(
+                            x: .value("Selected date", selectedPoint.date),
+                            y: .value("Selected days", selectedPoint.days)
+                        )
+                        .symbolSize(72)
+                        .foregroundStyle(GapStyle.info)
+                    }
                 }
+                .chartXSelection(value: $selectedDate)
+                .chartXScale(domain: xDomain)
+                .chartXScale(range: .plotDimension(startPadding: 28, endPadding: 28))
                 .chartYAxis {
                     AxisMarks(position: .leading) { _ in
                         AxisGridLine().foregroundStyle(GapStyle.line)
@@ -123,9 +162,13 @@ private struct GapTrendCard: View {
                     }
                 }
                 .chartXAxis {
-                    AxisMarks(values: .automatic(desiredCount: 4)) { _ in
-                        AxisValueLabel(format: chartDateFormat)
+                    AxisMarks(values: xAxisDates) { value in
+                        if let date = value.as(Date.self) {
+                            AxisValueLabel(collisionResolution: .disabled) {
+                                Text(date, format: chartDateFormat)
+                            }
                             .foregroundStyle(GapStyle.secondary)
+                        }
                     }
                 }
                 .frame(height: 230)
@@ -139,6 +182,29 @@ private struct GapTrendCard: View {
             .month(.abbreviated)
             .day()
             .locale(Locale(identifier: store.language.rawValue))
+    }
+
+    private var selectedPoint: GapPoint? {
+        guard let selectedDate else { return nil }
+        return store.metrics.trend.min {
+            abs($0.date.timeIntervalSince(selectedDate)) < abs($1.date.timeIntervalSince(selectedDate))
+        }
+    }
+
+    private var xAxisDates: [Date] {
+        let dates = store.metrics.trend.map(\.date)
+        guard dates.count > 3 else { return dates }
+        let lastIndex = dates.count - 1
+        return [dates[0], dates[lastIndex / 2], dates[lastIndex]]
+    }
+
+    private var xDomain: ClosedRange<Date> {
+        let dates = store.metrics.trend.map(\.date)
+        guard let first = dates.first, let last = dates.last else {
+            return store.metrics.today.addingTimeInterval(-86_400)...store.metrics.today.addingTimeInterval(86_400)
+        }
+        let padding = max(86_400, last.timeIntervalSince(first) * 0.06)
+        return first.addingTimeInterval(-padding)...last.addingTimeInterval(padding)
     }
 }
 
@@ -155,7 +221,10 @@ private struct UrgeEvidenceCard: View {
         VStack(alignment: .leading, spacing: 16) {
             SectionTitle(
                 store.text("被你控制住的冲动", "Urges you controlled"),
-                subtitle: store.text("只统计同日没有破例的冲动。", "Only urges on days without a slip are counted.")
+                subtitle: store.text(
+                    "只统计已经结束的日期中，同日没有破例的冲动。",
+                    "Only urges on completed days without a slip are counted."
+                )
             )
             HStack(alignment: .firstTextBaseline, spacing: 6) {
                 Text("\(store.metrics.urgesLastSevenDays)")
@@ -167,7 +236,7 @@ private struct UrgeEvidenceCard: View {
             }
             Chart(months) { item in
                 BarMark(
-                    x: .value("Month", item.month, unit: .month),
+                    x: .value("Month", monthLabel(for: item.month)),
                     y: .value("Urges", item.count)
                 )
                 .foregroundStyle(GapStyle.urge)
@@ -175,10 +244,11 @@ private struct UrgeEvidenceCard: View {
             }
             .chartYAxis(.hidden)
             .chartXAxis {
-                AxisMarks(values: .stride(by: .month)) { _ in
-                    AxisValueLabel(format: monthFormat)
+                AxisMarks(values: months.map { monthLabel(for: $0.month) }) { _ in
+                    AxisValueLabel()
                 }
             }
+            .chartXScale(range: .plotDimension(startPadding: 12, endPadding: 12))
             .frame(height: 130)
         }
         .softCard()
@@ -199,5 +269,9 @@ private struct UrgeEvidenceCard: View {
         .dateTime
             .month(.abbreviated)
             .locale(Locale(identifier: store.language.rawValue))
+    }
+
+    private func monthLabel(for month: Date) -> String {
+        month.formatted(monthFormat)
     }
 }
