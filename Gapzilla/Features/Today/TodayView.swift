@@ -79,11 +79,7 @@ private struct CurrentGapCard: View {
             }
             .foregroundStyle(GapStyle.ink)
 
-            Text(encouragement)
-                .font(.body.weight(.semibold))
-                .foregroundStyle(GapStyle.ink)
-
-            Text(store.text("数字只描述时间，不评价你。", "This number describes time. It does not judge you."))
+            Text(store.text("当前间隔按最近一次破例日期计算。", "The current gap is calculated from the most recent slip date."))
                 .font(.caption)
                 .foregroundStyle(GapStyle.secondary)
         }
@@ -91,13 +87,6 @@ private struct CurrentGapCard: View {
         .softCard(padding: 20)
     }
 
-    private var encouragement: String {
-        switch store.metrics.currentGap {
-        case 0: store.text("从今天开始，给变化留下证据。", "Start today and leave evidence of change.")
-        case 1...6: store.text("新的间隔正在形成。", "A new gap is taking shape.")
-        default: store.text("你已经让这段间隔持续了 \(store.metrics.currentGap) 天。", "You have kept this gap growing for \(store.metrics.currentGap) days.")
-        }
-    }
 }
 
 private struct QuickRecordCard: View {
@@ -108,7 +97,7 @@ private struct QuickRecordCard: View {
         VStack(alignment: .leading, spacing: 14) {
             SectionTitle(
                 store.text("今天发生了什么？", "What happened today?"),
-                subtitle: store.text("两种事实都值得被留下。", "Both kinds of facts deserve to be kept.")
+                subtitle: store.text("选择要记录的事件类型。", "Choose the event type to record.")
             )
             HStack(spacing: 12) {
                 QuickRecordButton(

@@ -190,14 +190,6 @@ struct AccountSheet: View {
                     .padding(.vertical, 5)
                 }
 
-                Section(store.text("语言", "Language")) {
-                    Picker(store.text("语言", "Language"), selection: $store.language) {
-                        Text("中文").tag(AppLanguage.chinese)
-                        Text("English").tag(AppLanguage.english)
-                    }
-                    .pickerStyle(.segmented)
-                }
-
                 Section(store.text("登录方式", "Sign-in methods")) {
                     loginMethodRow(
                         store.text("用户名和密码", "Username and password"),

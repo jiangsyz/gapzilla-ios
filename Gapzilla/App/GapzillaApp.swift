@@ -34,7 +34,7 @@ struct GapzillaApp: App {
         WindowGroup {
             RootView()
                 .environmentObject(store)
-                .environment(\.locale, Locale(identifier: store.language.rawValue))
+                .environment(\.locale, Locale(identifier: "zh_Hans"))
                 .tint(GapStyle.info)
                 .task { await store.bootstrap() }
         }

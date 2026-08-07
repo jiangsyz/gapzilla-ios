@@ -65,7 +65,7 @@ struct RecordEventSheet: View {
                 }
 
                 Section {
-                    Text(store.text("记录的是事实，不是对自己的判决。", "You are recording a fact, not passing a verdict."))
+                    Text(store.text("保存后可在历史中查看。", "Saved events appear in History."))
                         .font(.footnote.weight(.medium))
                         .foregroundStyle(GapStyle.secondary)
                 }

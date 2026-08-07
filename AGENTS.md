@@ -11,3 +11,8 @@
 - Treat existing `controlledUrges` code and legacy “same-day” wording as derived/legacy behavior, not as the definition of `EventKind.urge`. Do not propagate that wording to raw-event UI.
 
 The cross-platform source of truth is `/Users/jiangshen/www/gapzilla-design/PRODUCT_SEMANTICS.md`.
+
+## iOS product constraints
+
+- Gapzilla iOS is Chinese-only. Do not add a language switcher, persist an app-language preference, or choose English UI from the device locale unless the user explicitly changes this requirement.
+- The in-app `GapzillaMark` must use the same current visual asset as `AppIcon`; do not maintain a separate legacy logo.

@@ -32,32 +32,15 @@ struct WelcomeView: View {
             PageBackground()
             ScrollView {
                 VStack(alignment: .leading, spacing: 0) {
-                    HStack {
-                        BrandLockup(compact: true)
-                        Spacer()
-                        Menu {
-                            Button("中文") { store.language = .chinese }
-                            Button("English") { store.language = .english }
-                        } label: {
-                            Image(systemName: "globe")
-                                .font(.body.weight(.semibold))
-                                .foregroundStyle(GapStyle.ink)
-                                .frame(width: 42, height: 42)
-                                .background(GapStyle.surface, in: RoundedRectangle(cornerRadius: 8, style: .continuous))
-                                .overlay {
-                                    RoundedRectangle(cornerRadius: 8, style: .continuous)
-                                        .stroke(GapStyle.line, lineWidth: 1)
-                                }
-                        }
-                    }
+                    BrandLockup(compact: true)
                     .padding(.bottom, 48)
 
-                    Text(store.text("记录事实，不做审判", "FACTS, NOT JUDGMENT"))
+                    Text(store.text("目标间隔记录工具", "Goal interval tracker"))
                         .font(.caption.weight(.bold))
                         .tracking(0.7)
                         .foregroundStyle(GapStyle.info)
 
-                    Text(store.text("别追求从不破例，\n只看间隔是否正在变长", "Stop chasing perfection\nWatch the gaps grow"))
+                    Text(store.text("目标与事件记录", "Goals and event records"))
                         .font(.system(size: 38, weight: .bold, design: .default))
                         .tracking(-1)
                         .foregroundStyle(GapStyle.ink)
@@ -65,8 +48,8 @@ struct WelcomeView: View {
                         .fixedSize(horizontal: false, vertical: true)
 
                     Text(store.text(
-                        "Gapzilla 记录破例和冲动，再根据当天结果呈现改变。一次困难，不会抹掉周围的进步。",
-                        "Gapzilla records slips and urges, then interprets each day from those facts. One hard day never erases the progress around it."
+                        "支持创建目标、记录破例与冲动，并根据历史数据计算当前、最长和平均间隔。",
+                        "Create goals, record slips and urges, and calculate current, longest, and average gaps from historical data."
                     ))
                     .font(.body.weight(.medium))
                     .foregroundStyle(GapStyle.secondary)
@@ -97,7 +80,7 @@ struct WelcomeView: View {
                     }
 
                     Label(
-                        store.text("一次破例是一条数据，不是一次判决。", "A slip is a data point, not a verdict."),
+                        store.text("登录后可创建目标并记录事件。", "Sign in to create goals and record events."),
                         systemImage: "circle.fill"
                     )
                     .font(.caption.weight(.semibold))
@@ -429,11 +412,11 @@ private struct CurrentGapPreview: View {
     var body: some View {
         VStack(alignment: .leading, spacing: 16) {
             HStack {
-                Text(store.text("你的改变会这样呈现", "A sample of your progress"))
+                Text(store.text("数据示例", "Sample data"))
                     .font(.caption.weight(.semibold))
                     .foregroundStyle(GapStyle.secondary)
                 Spacer()
-                Text("Gapzilla")
+                Text(store.text("当前间隔", "Current gap"))
                     .font(.caption2.weight(.bold))
                     .foregroundStyle(GapStyle.ink)
                     .padding(.horizontal, 10)
