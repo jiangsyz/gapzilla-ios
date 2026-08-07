@@ -10,16 +10,16 @@ struct InsightsView: View {
     var body: some View {
         NavigationStack {
             ZStack {
-                GlowBackground()
+                PageBackground()
                 ScrollView {
-                    LazyVStack(spacing: 18) {
+                    LazyVStack(spacing: 14) {
                         InsightHeroCard()
                         GapTrendCard()
                         UrgeEvidenceCard()
                     }
-                    .padding(.horizontal, 18)
-                    .padding(.top, 10)
-                    .padding(.bottom, 28)
+                    .padding(.horizontal, 16)
+                    .padding(.top, 8)
+                    .padding(.bottom, 24)
                 }
                 .refreshable { await store.refreshAll() }
             }
@@ -52,8 +52,8 @@ private struct InsightHeroCard: View {
                 subtitle: summary
             )
             HStack(spacing: 10) {
-                MetricTile(value: store.metrics.currentGap, label: store.text("当前间隔", "Current"), color: GapStyle.coral)
-                MetricTile(value: store.metrics.bestGap, label: store.text("最长间隔", "Best"), color: GapStyle.plum)
+                MetricTile(value: store.metrics.currentGap, label: store.text("当前间隔", "Current"), color: GapStyle.info)
+                MetricTile(value: store.metrics.bestGap, label: store.text("最长间隔", "Best"), color: GapStyle.warning)
                 MetricTile(value: store.metrics.averageGap, label: store.text("平均间隔", "Average"), color: GapStyle.ink)
             }
             if let previous = store.metrics.previousGap {
@@ -103,27 +103,18 @@ private struct GapTrendCard: View {
                 .frame(height: 210)
             } else {
                 Chart(store.metrics.trend) { point in
-                    AreaMark(
-                        x: .value("Date", point.date),
-                        y: .value("Days", point.days)
-                    )
-                    .foregroundStyle(LinearGradient(
-                        colors: [GapStyle.coral.opacity(0.28), GapStyle.coral.opacity(0.02)],
-                        startPoint: .top,
-                        endPoint: .bottom
-                    ))
                     LineMark(
                         x: .value("Date", point.date),
                         y: .value("Days", point.days)
                     )
-                    .lineStyle(StrokeStyle(lineWidth: 3, lineCap: .round, lineJoin: .round))
-                    .foregroundStyle(GapStyle.coral)
+                    .lineStyle(StrokeStyle(lineWidth: 2, lineCap: .round, lineJoin: .round))
+                    .foregroundStyle(GapStyle.info)
                     PointMark(
                         x: .value("Date", point.date),
                         y: .value("Days", point.days)
                     )
-                    .symbolSize(48)
-                    .foregroundStyle(GapStyle.plum)
+                    .symbolSize(36)
+                    .foregroundStyle(GapStyle.info)
                 }
                 .chartYAxis {
                     AxisMarks(position: .leading) { _ in
@@ -168,8 +159,8 @@ private struct UrgeEvidenceCard: View {
             )
             HStack(alignment: .firstTextBaseline, spacing: 6) {
                 Text("\(store.metrics.urgesLastSevenDays)")
-                    .font(.system(size: 44, weight: .bold, design: .rounded))
-                    .foregroundStyle(GapStyle.plum)
+                    .font(.system(size: 44, weight: .bold, design: .default))
+                    .foregroundStyle(GapStyle.urge)
                 Text(store.text("次 / 近 7 天", "in the last 7 days"))
                     .font(.subheadline.weight(.semibold))
                     .foregroundStyle(GapStyle.secondary)
@@ -179,8 +170,8 @@ private struct UrgeEvidenceCard: View {
                     x: .value("Month", item.month, unit: .month),
                     y: .value("Urges", item.count)
                 )
-                .foregroundStyle(GapStyle.plum.gradient)
-                .cornerRadius(5)
+                .foregroundStyle(GapStyle.urge)
+                .cornerRadius(3)
             }
             .chartYAxis(.hidden)
             .chartXAxis {

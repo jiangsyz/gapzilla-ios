@@ -10,15 +10,15 @@ struct HistoryView: View {
     var body: some View {
         NavigationStack {
             ZStack {
-                GlowBackground()
+                PageBackground()
                 ScrollView {
-                    LazyVStack(spacing: 18) {
+                    LazyVStack(spacing: 14) {
                         CalendarCard(month: $month)
                         EventHistoryCard()
                     }
-                    .padding(.horizontal, 18)
-                    .padding(.top, 10)
-                    .padding(.bottom, 28)
+                    .padding(.horizontal, 16)
+                    .padding(.top, 8)
+                    .padding(.bottom, 24)
                 }
                 .refreshable { await store.refreshAll() }
             }
@@ -85,8 +85,8 @@ private struct CalendarCard: View {
             }
 
             HStack(spacing: 14) {
-                CalendarLegend(color: GapStyle.coral, text: store.text("破例", "Slip"))
-                CalendarLegend(color: GapStyle.plum, text: store.text("冲动", "Urge"))
+                CalendarLegend(color: GapStyle.slip, text: store.text("破例", "Slip"))
+                CalendarLegend(color: GapStyle.urge, text: store.text("冲动", "Urge"))
                 Spacer()
             }
         }
@@ -120,8 +120,11 @@ private struct CalendarCard: View {
                 .font(.caption.weight(.bold))
                 .foregroundStyle(GapStyle.ink)
                 .frame(width: 36, height: 36)
-                .background(.white, in: Circle())
-                .overlay { Circle().stroke(GapStyle.line) }
+                .background(GapStyle.surface, in: RoundedRectangle(cornerRadius: 8, style: .continuous))
+                .overlay {
+                    RoundedRectangle(cornerRadius: 8, style: .continuous)
+                        .stroke(GapStyle.line, lineWidth: 1)
+                }
         }
     }
 }
@@ -138,20 +141,20 @@ private struct CalendarDayCell: View {
             HStack {
                 if let kind {
                     Circle()
-                        .fill(kind == .slip ? GapStyle.coral : GapStyle.plum)
+                        .fill(kind == .slip ? GapStyle.slip : GapStyle.urge)
                         .frame(width: 5, height: 5)
                 }
             }
             .frame(height: 5)
         }
         .frame(maxWidth: .infinity)
-        .frame(height: 42)
+        .frame(height: 40)
         .background(
             dayBackground,
-            in: RoundedRectangle(cornerRadius: 12, style: .continuous)
+            in: RoundedRectangle(cornerRadius: 7, style: .continuous)
         )
         .overlay {
-            RoundedRectangle(cornerRadius: 12, style: .continuous)
+            RoundedRectangle(cornerRadius: 7, style: .continuous)
                 .stroke(dayBorder, lineWidth: Calendar.current.isDateInToday(date) ? 1.5 : 1)
         }
     }
@@ -159,27 +162,27 @@ private struct CalendarDayCell: View {
     private var dayBackground: Color {
         switch kind {
         case .slip:
-            return GapStyle.coralSoft
+            return GapStyle.slipSoft
         case .urge:
-            return GapStyle.plumSoft
+            return GapStyle.urgeSoft
         case nil:
-            return .clear
+            return GapStyle.surfaceSoft.opacity(0.62)
         }
     }
 
     private var dayForeground: Color {
         switch kind {
-        case .slip: return GapStyle.coral
-        case .urge: return GapStyle.plum
+        case .slip: return GapStyle.slip
+        case .urge: return GapStyle.urge
         case nil: return GapStyle.ink
         }
     }
 
     private var dayBorder: Color {
         if Calendar.current.isDateInToday(date) {
-            return GapStyle.secondary.opacity(0.42)
+            return GapStyle.info.opacity(0.55)
         }
-        return kind == nil ? GapStyle.line.opacity(0.8) : .clear
+        return .clear
     }
 }
 
@@ -230,14 +233,14 @@ private struct HistoryEventRow: View {
 
     var body: some View {
         HStack(alignment: .top, spacing: 12) {
-            VStack(spacing: 6) {
-                Image(systemName: event.kind == .slip ? "arrow.counterclockwise" : "hand.raised.fill")
-                    .font(.caption.weight(.bold))
-                    .foregroundStyle(event.kind == .slip ? GapStyle.coral : GapStyle.plum)
-                    .frame(width: 34, height: 34)
-                    .background(event.kind == .slip ? GapStyle.coralSoft : GapStyle.plumSoft, in: Circle())
-                Rectangle().fill(GapStyle.line).frame(width: 1, height: 25)
-            }
+            Image(systemName: event.kind == .slip ? "arrow.counterclockwise" : "hand.raised.fill")
+                .font(.caption.weight(.bold))
+                .foregroundStyle(event.kind == .slip ? GapStyle.slip : GapStyle.urge)
+                .frame(width: 34, height: 34)
+                .background(
+                    event.kind == .slip ? GapStyle.slipSoft : GapStyle.urgeSoft,
+                    in: RoundedRectangle(cornerRadius: 8, style: .continuous)
+                )
             VStack(alignment: .leading, spacing: 5) {
                 HStack {
                     Text(event.kind == .slip ? store.text("破例", "Slip") : store.text("冲动", "Urge"))
@@ -252,7 +255,7 @@ private struct HistoryEventRow: View {
                          ? store.text("已坚持 \(days) 天", "Growing for \(days) days")
                          : store.text("\(days) 天", "\(days) days"))
                         .font(.caption.weight(.bold))
-                        .foregroundStyle(GapStyle.coral)
+                        .foregroundStyle(GapStyle.slip)
                 }
                 if !event.note.isEmpty {
                     Text(event.note)

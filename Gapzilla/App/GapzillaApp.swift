@@ -6,10 +6,27 @@ struct GapzillaApp: App {
     @StateObject private var store = AppStore()
 
     init() {
-        let ink = UIColor(red: 0.15, green: 0.14, blue: 0.25, alpha: 1)
-        let secondary = UIColor(red: 0.40, green: 0.43, blue: 0.51, alpha: 1)
-        UINavigationBar.appearance().largeTitleTextAttributes = [.foregroundColor: ink]
-        UINavigationBar.appearance().titleTextAttributes = [.foregroundColor: ink]
+        let ink = UIColor(red: 36 / 255, green: 36 / 255, blue: 33 / 255, alpha: 1)
+        let secondary = UIColor(red: 110 / 255, green: 108 / 255, blue: 102 / 255, alpha: 1)
+        let canvas = UIColor(red: 251 / 255, green: 250 / 255, blue: 248 / 255, alpha: 1)
+        let surface = UIColor.white
+        let line = UIColor(red: 221 / 255, green: 218 / 255, blue: 211 / 255, alpha: 1)
+
+        let navigationAppearance = UINavigationBarAppearance()
+        navigationAppearance.configureWithOpaqueBackground()
+        navigationAppearance.backgroundColor = canvas
+        navigationAppearance.shadowColor = .clear
+        navigationAppearance.largeTitleTextAttributes = [.foregroundColor: ink]
+        navigationAppearance.titleTextAttributes = [.foregroundColor: ink]
+        UINavigationBar.appearance().standardAppearance = navigationAppearance
+        UINavigationBar.appearance().scrollEdgeAppearance = navigationAppearance
+
+        let tabAppearance = UITabBarAppearance()
+        tabAppearance.configureWithOpaqueBackground()
+        tabAppearance.backgroundColor = surface
+        tabAppearance.shadowColor = line
+        UITabBar.appearance().standardAppearance = tabAppearance
+        UITabBar.appearance().scrollEdgeAppearance = tabAppearance
         UITabBar.appearance().unselectedItemTintColor = secondary
     }
 
@@ -18,7 +35,7 @@ struct GapzillaApp: App {
             RootView()
                 .environmentObject(store)
                 .environment(\.locale, Locale(identifier: store.language.rawValue))
-                .tint(GapStyle.coral)
+                .tint(GapStyle.info)
                 .task { await store.bootstrap() }
         }
     }
@@ -60,11 +77,11 @@ struct RootView: View {
 private struct LaunchView: View {
     var body: some View {
         ZStack {
-            GlowBackground()
+            PageBackground()
             VStack(spacing: 18) {
                 LogoMark(size: 66)
                 ProgressView()
-                    .tint(GapStyle.coral)
+                    .tint(GapStyle.info)
             }
         }
     }
@@ -99,6 +116,6 @@ struct MainTabView: View {
                 .tag(2)
         }
         .toolbarBackground(.visible, for: .tabBar)
-        .toolbarBackground(.ultraThinMaterial, for: .tabBar)
+        .toolbarBackground(GapStyle.surface, for: .tabBar)
     }
 }

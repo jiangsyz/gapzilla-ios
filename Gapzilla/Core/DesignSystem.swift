@@ -1,14 +1,25 @@
 import SwiftUI
 
 enum GapStyle {
-    static let coral = Color(red: 1.00, green: 82 / 255, blue: 105 / 255)
-    static let coralSoft = Color(red: 1.00, green: 238 / 255, blue: 240 / 255)
-    static let plum = Color(red: 124 / 255, green: 99 / 255, blue: 117 / 255)
-    static let plumSoft = Color(red: 243 / 255, green: 237 / 255, blue: 242 / 255)
-    static let ink = Color(red: 0.15, green: 0.14, blue: 0.25)
-    static let secondary = Color(red: 0.40, green: 0.43, blue: 0.51)
-    static let line = Color(red: 0.89, green: 0.90, blue: 0.93)
-    static let canvas = Color(red: 0.985, green: 0.98, blue: 0.99)
+    static let canvas = Color(red: 251 / 255, green: 250 / 255, blue: 248 / 255)
+    static let surface = Color.white
+    static let surfaceStrong = Color(red: 36 / 255, green: 36 / 255, blue: 33 / 255)
+    static let surfaceSoft = Color(red: 241 / 255, green: 240 / 255, blue: 236 / 255)
+    static let ink = Color(red: 36 / 255, green: 36 / 255, blue: 33 / 255)
+    static let secondary = Color(red: 110 / 255, green: 108 / 255, blue: 102 / 255)
+    static let placeholder = Color(red: 170 / 255, green: 166 / 255, blue: 158 / 255)
+    static let line = Color(red: 221 / 255, green: 218 / 255, blue: 211 / 255)
+    static let slip = Color(red: 207 / 255, green: 78 / 255, blue: 95 / 255)
+    static let slipSoft = Color(red: 250 / 255, green: 236 / 255, blue: 239 / 255)
+    static let urge = Color(red: 47 / 255, green: 125 / 255, blue: 90 / 255)
+    static let urgeSoft = Color(red: 235 / 255, green: 245 / 255, blue: 239 / 255)
+    static let danger = slip
+    static let info = Color(red: 62 / 255, green: 111 / 255, blue: 152 / 255)
+    static let infoSoft = Color(red: 237 / 255, green: 243 / 255, blue: 247 / 255)
+    static let warning = Color(red: 154 / 255, green: 104 / 255, blue: 28 / 255)
+    static let warningSoft = Color(red: 255 / 255, green: 244 / 255, blue: 216 / 255)
+    static let radius: CGFloat = 10
+    static let cardRadius: CGFloat = 12
 }
 
 struct LogoMark: View {
@@ -18,9 +29,9 @@ struct LogoMark: View {
         Image("GapzillaMark")
             .resizable()
             .scaledToFit()
-        .frame(width: size, height: size)
-        .shadow(color: GapStyle.plum.opacity(0.16), radius: 14, y: 8)
-        .accessibilityHidden(true)
+            .frame(width: size, height: size)
+            .shadow(color: GapStyle.ink.opacity(0.10), radius: 8, y: 4)
+            .accessibilityHidden(true)
     }
 }
 
@@ -32,7 +43,7 @@ struct BrandLockup: View {
             LogoMark(size: compact ? 38 : 46)
             VStack(alignment: .leading, spacing: 0) {
                 Text("Gapzilla")
-                    .font(.system(compact ? .headline : .title3, design: .rounded, weight: .bold))
+                    .font(.system(compact ? .headline : .title3, design: .default, weight: .bold))
                     .foregroundStyle(GapStyle.ink)
                 if !compact {
                     Text("记录间隔，让它变长。")
@@ -48,17 +59,17 @@ struct SoftCardModifier: ViewModifier {
     var padding: CGFloat = 18
 
     func body(content: Content) -> some View {
-        let shape = RoundedRectangle(cornerRadius: 24, style: .continuous)
+        let shape = RoundedRectangle(cornerRadius: GapStyle.cardRadius, style: .continuous)
 
         content
             .padding(padding)
-            .background(.white.opacity(0.94), in: shape)
+            .background(GapStyle.surface, in: shape)
             .clipShape(shape)
             .overlay {
                 shape
-                    .stroke(GapStyle.line.opacity(0.8), lineWidth: 1)
+                    .stroke(GapStyle.line, lineWidth: 1)
             }
-            .shadow(color: GapStyle.plum.opacity(0.07), radius: 20, y: 10)
+            .shadow(color: GapStyle.ink.opacity(0.035), radius: 8, y: 2)
     }
 }
 
@@ -68,22 +79,9 @@ extension View {
     }
 }
 
-struct GlowBackground: View {
+struct PageBackground: View {
     var body: some View {
-        ZStack {
-            GapStyle.canvas
-            Circle()
-                .fill(GapStyle.coral.opacity(0.11))
-                .frame(width: 330, height: 330)
-                .blur(radius: 75)
-                .offset(x: 170, y: -260)
-            Circle()
-                .fill(GapStyle.plum.opacity(0.07))
-                .frame(width: 260, height: 260)
-                .blur(radius: 85)
-                .offset(x: -180, y: 310)
-        }
-        .ignoresSafeArea()
+        GapStyle.canvas.ignoresSafeArea()
     }
 }
 
@@ -101,13 +99,12 @@ struct SectionTitle: View {
     var body: some View {
         VStack(alignment: .leading, spacing: 5) {
             if let eyebrow {
-                Text(eyebrow.uppercased())
-                    .font(.caption2.weight(.bold))
-                    .tracking(0.8)
-                    .foregroundStyle(GapStyle.coral)
+                Text(eyebrow)
+                    .font(.caption.weight(.semibold))
+                    .foregroundStyle(GapStyle.info)
             }
             Text(title)
-                .font(.title2.weight(.bold))
+                .font(.title3.weight(.bold))
                 .foregroundStyle(GapStyle.ink)
             if let subtitle {
                 Text(subtitle)
@@ -116,5 +113,43 @@ struct SectionTitle: View {
             }
         }
         .frame(maxWidth: .infinity, alignment: .leading)
+    }
+}
+
+struct PrimaryActionButtonStyle: ButtonStyle {
+    @Environment(\.isEnabled) private var isEnabled
+
+    func makeBody(configuration: Configuration) -> some View {
+        configuration.label
+            .font(.headline)
+            .frame(maxWidth: .infinity)
+            .frame(height: 52)
+            .foregroundStyle(GapStyle.surface)
+            .background(
+                configuration.isPressed ? GapStyle.ink.opacity(0.86) : GapStyle.surfaceStrong,
+                in: RoundedRectangle(cornerRadius: GapStyle.radius, style: .continuous)
+            )
+            .opacity(isEnabled ? 1 : 0.55)
+    }
+}
+
+struct SecondaryActionButtonStyle: ButtonStyle {
+    @Environment(\.isEnabled) private var isEnabled
+
+    func makeBody(configuration: Configuration) -> some View {
+        configuration.label
+            .font(.headline)
+            .frame(maxWidth: .infinity)
+            .frame(height: 52)
+            .foregroundStyle(GapStyle.ink)
+            .background(
+                configuration.isPressed ? GapStyle.surfaceSoft : GapStyle.surface,
+                in: RoundedRectangle(cornerRadius: GapStyle.radius, style: .continuous)
+            )
+            .overlay {
+                RoundedRectangle(cornerRadius: GapStyle.radius, style: .continuous)
+                    .stroke(GapStyle.line, lineWidth: 1)
+            }
+            .opacity(isEnabled ? 1 : 0.55)
     }
 }
