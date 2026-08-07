@@ -123,26 +123,6 @@ private struct GapTrendCard: View {
                         RuleMark(x: .value("Selected date", selectedPoint.date))
                             .foregroundStyle(GapStyle.secondary.opacity(0.45))
                             .lineStyle(StrokeStyle(lineWidth: 1, dash: [3, 3]))
-                            .annotation(position: .top, spacing: 6) {
-                                VStack(alignment: .leading, spacing: 2) {
-                                    Text(selectedPoint.date, format: chartDateFormat)
-                                        .font(.caption2)
-                                        .foregroundStyle(GapStyle.secondary)
-                                    Text("\(selectedPoint.days) \(store.text("天", "days"))")
-                                        .font(.caption.weight(.bold))
-                                        .foregroundStyle(GapStyle.ink)
-                                }
-                                .padding(.horizontal, 9)
-                                .padding(.vertical, 7)
-                                .background(
-                                    GapStyle.surface,
-                                    in: RoundedRectangle(cornerRadius: 7, style: .continuous)
-                                )
-                                .overlay {
-                                    RoundedRectangle(cornerRadius: 7, style: .continuous)
-                                        .stroke(GapStyle.line, lineWidth: 1)
-                                }
-                            }
 
                         PointMark(
                             x: .value("Selected date", selectedPoint.date),
@@ -150,11 +130,51 @@ private struct GapTrendCard: View {
                         )
                         .symbolSize(72)
                         .foregroundStyle(GapStyle.info)
+                        .annotation(
+                            position: .top,
+                            spacing: 8,
+                            overflowResolution: AnnotationOverflowResolution(
+                                x: .fit(to: .chart),
+                                y: .fit(to: .chart)
+                            )
+                        ) {
+                            VStack(alignment: .leading, spacing: 2) {
+                                Text(selectedPoint.date, format: chartDateFormat)
+                                    .font(.caption2)
+                                    .foregroundStyle(GapStyle.secondary)
+                                    .lineLimit(1)
+                                Text("\(selectedPoint.days) \(store.text("天", "days"))")
+                                    .font(.caption.weight(.bold))
+                                    .foregroundStyle(GapStyle.ink)
+                            }
+                            .fixedSize(horizontal: true, vertical: true)
+                            .padding(.horizontal, 9)
+                            .padding(.vertical, 7)
+                            .background(
+                                GapStyle.surface,
+                                in: RoundedRectangle(cornerRadius: 7, style: .continuous)
+                            )
+                            .overlay {
+                                RoundedRectangle(cornerRadius: 7, style: .continuous)
+                                    .stroke(GapStyle.line, lineWidth: 1)
+                            }
+                        }
                     }
                 }
                 .chartXSelection(value: $selectedDate)
                 .chartXScale(domain: xDomain)
                 .chartXScale(range: .plotDimension(startPadding: 28, endPadding: 28))
+                .onAppear {
+#if DEBUG
+                    if ProcessInfo.processInfo.arguments.contains("--ui-preview-insights-first-point") {
+                        selectedDate = store.metrics.trend.first?.date
+                    } else if ProcessInfo.processInfo.arguments.contains("--ui-preview-insights-middle-point") {
+                        selectedDate = store.metrics.trend.dropFirst(store.metrics.trend.count / 2).first?.date
+                    } else if ProcessInfo.processInfo.arguments.contains("--ui-preview-insights-last-point") {
+                        selectedDate = store.metrics.trend.last?.date
+                    }
+#endif
+                }
                 .chartYAxis {
                     AxisMarks(position: .leading) { _ in
                         AxisGridLine().foregroundStyle(GapStyle.line)
@@ -166,6 +186,9 @@ private struct GapTrendCard: View {
                         if let date = value.as(Date.self) {
                             AxisValueLabel(collisionResolution: .disabled) {
                                 Text(date, format: chartDateFormat)
+                                    .lineLimit(1)
+                                    .fixedSize(horizontal: true, vertical: false)
+                                    .offset(x: xAxisLabelOffset(for: value))
                             }
                             .foregroundStyle(GapStyle.secondary)
                         }
@@ -205,6 +228,10 @@ private struct GapTrendCard: View {
         }
         let padding = max(86_400, last.timeIntervalSince(first) * 0.06)
         return first.addingTimeInterval(-padding)...last.addingTimeInterval(padding)
+    }
+
+    private func xAxisLabelOffset(for value: AxisValue) -> CGFloat {
+        value.index == value.count - 1 ? -24 : 0
     }
 }
 
