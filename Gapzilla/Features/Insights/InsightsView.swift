@@ -59,7 +59,7 @@ private struct InsightHeroCard: View {
     var body: some View {
         VStack(alignment: .leading, spacing: 16) {
             SectionTitle(
-                store.text("先看方向，不看完美", "Direction over perfection"),
+                store.text("间隔统计", "Gap statistics"),
                 eyebrow: store.text("变化摘要", "Progress summary"),
                 subtitle: summary
             )
@@ -93,7 +93,7 @@ private struct InsightHeroCard: View {
         if delta == 0 {
             return store.text("当前间隔已经追平上一次。", "The current gap has matched the previous one.")
         }
-        return store.text("还有 \(-delta) 天追平上一次，变化仍在继续。", "\(-delta) days to match the previous gap. The story is still unfolding.")
+        return store.text("当前间隔比上一次少 \(-delta) 天。", "The current gap is \(-delta) days shorter than the previous one.")
     }
 }
 
@@ -216,7 +216,7 @@ private struct GapTrendCard: View {
         .dateTime
             .month(.abbreviated)
             .day()
-            .locale(Locale(identifier: store.language.rawValue))
+            .locale(Locale(identifier: "zh_Hans"))
     }
 
     private var selectedPoint: GapPoint? {
@@ -320,7 +320,7 @@ private struct UrgeEvidenceCard: View {
     private var monthFormat: Date.FormatStyle {
         .dateTime
             .month(.abbreviated)
-            .locale(Locale(identifier: store.language.rawValue))
+            .locale(Locale(identifier: "zh_Hans"))
     }
 
     private var yAxisUpperBound: Int {

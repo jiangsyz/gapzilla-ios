@@ -95,7 +95,7 @@ private struct CalendarCard: View {
 
     private var weekdaySymbols: [String] {
         let formatter = DateFormatter()
-        formatter.locale = store.isChinese ? Locale(identifier: "zh_Hans") : Locale(identifier: "en_US")
+        formatter.locale = Locale(identifier: "zh_Hans")
         return formatter.veryShortStandaloneWeekdaySymbols
     }
 

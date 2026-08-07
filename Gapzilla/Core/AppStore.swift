@@ -7,13 +7,6 @@ enum AppPhase: Equatable {
     case signedIn
 }
 
-enum AppLanguage: String, CaseIterable, Identifiable {
-    case chinese = "zh-Hans"
-    case english = "en"
-
-    var id: String { rawValue }
-}
-
 @MainActor
 final class AppStore: ObservableObject {
     @Published var phase: AppPhase = .launching
@@ -24,10 +17,6 @@ final class AppStore: ObservableObject {
     @Published var isBusy = false
     @Published var errorMessage: String?
     @Published var appleAccountChoice: AppleAccountChoice?
-    @Published var language: AppLanguage {
-        didSet { UserDefaults.standard.set(language.rawValue, forKey: Keys.language) }
-    }
-
     private let api: APIClient
     private var accessToken: String?
     private var refreshToken: String?
@@ -36,7 +25,6 @@ final class AppStore: ObservableObject {
         static let accessToken = "access_token"
         static let refreshToken = "refresh_token"
         static let selectedGoal = "selected_goal_id"
-        static let language = "language"
     }
 
     init(api: APIClient = .app) {
@@ -44,12 +32,6 @@ final class AppStore: ObservableObject {
         accessToken = KeychainStore.read(account: Keys.accessToken)
         refreshToken = KeychainStore.read(account: Keys.refreshToken)
         selectedGoalID = UserDefaults.standard.string(forKey: Keys.selectedGoal)
-        if let stored = UserDefaults.standard.string(forKey: Keys.language),
-           let value = AppLanguage(rawValue: stored) {
-            language = value
-        } else {
-            language = Locale.preferredLanguages.first?.hasPrefix("zh") == true ? .chinese : .english
-        }
 #if DEBUG
         applyDebugPreviewIfNeeded()
 #endif
@@ -60,10 +42,8 @@ final class AppStore: ObservableObject {
     }
 
     var metrics: GoalMetrics { GoalMetrics(events: events, today: Date()) }
-    var isChinese: Bool { language == .chinese }
-
-    func text(_ chinese: String, _ english: String) -> String {
-        isChinese ? chinese : english
+    func text(_ chinese: String, _: String) -> String {
+        chinese
     }
 
     func bootstrap() async {

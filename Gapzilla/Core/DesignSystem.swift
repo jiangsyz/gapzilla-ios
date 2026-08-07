@@ -30,6 +30,7 @@ struct LogoMark: View {
             .resizable()
             .scaledToFit()
             .frame(width: size, height: size)
+            .clipShape(RoundedRectangle(cornerRadius: size * 0.22, style: .continuous))
             .shadow(color: GapStyle.ink.opacity(0.10), radius: 8, y: 4)
             .accessibilityHidden(true)
     }
@@ -46,7 +47,7 @@ struct BrandLockup: View {
                     .font(.system(compact ? .headline : .title3, design: .default, weight: .bold))
                     .foregroundStyle(GapStyle.ink)
                 if !compact {
-                    Text("记录间隔，让它变长。")
+                    Text("目标间隔记录工具")
                         .font(.caption)
                         .foregroundStyle(GapStyle.secondary)
                 }
