@@ -69,11 +69,11 @@ struct RecordEventSheet: View {
                         .font(.footnote.weight(.medium))
                         .foregroundStyle(GapStyle.secondary)
                 }
-                .listRowBackground(GapStyle.coralSoft.opacity(0.7))
+                .listRowBackground(GapStyle.surfaceSoft)
             }
             .scrollDismissesKeyboard(.interactively)
             .scrollContentBackground(.hidden)
-            .background(GlowBackground())
+            .background(PageBackground())
             .background {
                 KeyboardDismissalInstaller(action: dismissKeyboard)
             }

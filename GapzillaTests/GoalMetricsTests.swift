@@ -56,6 +56,29 @@ final class GoalMetricsTests: XCTestCase {
         XCTAssertEqual(metrics.urgesLastSevenDays, 1)
     }
 
+    func testCurrentDayUrgeRemainsUnresolved() throws {
+        let today = try date("2026-07-15")
+        let urge = event("urge", "2026-07-15", .urge)
+
+        let metrics = GoalMetrics(events: [urge], today: today)
+
+        XCTAssertEqual(metrics.dayKind(on: today), .urge)
+        XCTAssertTrue(metrics.controlledUrges.isEmpty)
+        XCTAssertEqual(metrics.urgesLastSevenDays, 0)
+    }
+
+    func testControlledUrgesUseSevenCompletedCalendarDays() throws {
+        let today = try date("2026-07-15")
+        let firstIncluded = event("included", "2026-07-08", .urge)
+        let justOutside = event("outside", "2026-07-07", .urge)
+        let unresolvedToday = event("today", "2026-07-15", .urge)
+
+        let metrics = GoalMetrics(events: [firstIncluded, justOutside, unresolvedToday], today: today)
+
+        XCTAssertEqual(metrics.controlledUrges.map(\.id), ["included", "outside"])
+        XCTAssertEqual(metrics.urgesLastSevenDays, 1)
+    }
+
     func testImpactUsesNextSlipAndCurrentDay() throws {
         let today = try date("2026-07-15")
         let first = event("slip-1", "2026-06-01", .slip)

@@ -31,8 +31,11 @@ struct GoalToolbarMenu: View {
             .foregroundStyle(GapStyle.ink)
             .padding(.horizontal, 12)
             .padding(.vertical, 8)
-            .background(.white, in: Capsule())
-            .overlay { Capsule().stroke(GapStyle.line) }
+            .background(GapStyle.surface, in: RoundedRectangle(cornerRadius: 8, style: .continuous))
+            .overlay {
+                RoundedRectangle(cornerRadius: 8, style: .continuous)
+                    .stroke(GapStyle.line, lineWidth: 1)
+            }
         }
     }
 }
@@ -83,6 +86,8 @@ struct GoalManagerSheet: View {
             newGoalSection
             goalsSection
         }
+        .scrollContentBackground(.hidden)
+        .background(PageBackground())
     }
 
     private var newGoalSection: some View {
@@ -119,12 +124,12 @@ struct GoalManagerSheet: View {
                     if goal.id == store.selectedGoalID {
                         Text(store.text("当前目标", "Current"))
                             .font(.caption)
-                            .foregroundStyle(GapStyle.coral)
+                            .foregroundStyle(GapStyle.info)
                     }
                 }
                 Spacer()
                 if goal.id == store.selectedGoalID {
-                    Image(systemName: "checkmark.circle.fill").foregroundStyle(GapStyle.coral)
+                    Image(systemName: "checkmark.circle.fill").foregroundStyle(GapStyle.info)
                 }
             }
         }
@@ -138,7 +143,7 @@ struct GoalManagerSheet: View {
             } label: {
                 Label(store.text("重命名", "Rename"), systemImage: "pencil")
             }
-            .tint(GapStyle.plum)
+            .tint(GapStyle.info)
         }
     }
 
@@ -242,6 +247,8 @@ struct AccountSheet: View {
                     }
                 }
             }
+            .scrollContentBackground(.hidden)
+            .background(PageBackground())
             .navigationTitle(store.text("账号", "Account"))
             .toolbar {
                 ToolbarItem(placement: .confirmationAction) {
@@ -268,7 +275,7 @@ struct AccountSheet: View {
             Spacer()
             Text(isLinked ? store.text("已绑定", "Linked") : store.text("未绑定", "Not linked"))
                 .font(.caption.weight(.semibold))
-                .foregroundStyle(isLinked ? GapStyle.coral : GapStyle.secondary)
+                .foregroundStyle(isLinked ? GapStyle.info : GapStyle.secondary)
         }
     }
 }
@@ -287,7 +294,7 @@ private struct DeleteAccountSheet: View {
                     VStack(alignment: .leading, spacing: 14) {
                         Image(systemName: "exclamationmark.triangle.fill")
                             .font(.system(size: 30, weight: .semibold))
-                            .foregroundStyle(GapStyle.coral)
+                            .foregroundStyle(GapStyle.danger)
                         Text(store.text("注销后无法恢复", "Deletion cannot be undone"))
                             .font(.title3.bold())
                             .foregroundStyle(GapStyle.ink)
@@ -337,6 +344,8 @@ private struct DeleteAccountSheet: View {
                     .foregroundStyle(GapStyle.secondary)
                 }
             }
+            .scrollContentBackground(.hidden)
+            .background(PageBackground())
             .navigationTitle(store.text("注销账号", "Delete Account"))
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) {
@@ -364,7 +373,7 @@ private struct DeleteAccountSheet: View {
                     Color.white.opacity(0.72).ignoresSafeArea()
                     ProgressView()
                         .controlSize(.large)
-                        .tint(GapStyle.coral)
+                        .tint(GapStyle.info)
                 }
             }
             .onChange(of: store.phase) { _, phase in

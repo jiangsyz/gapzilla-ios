@@ -18,17 +18,17 @@ struct TodayView: View {
     var body: some View {
         NavigationStack {
             ZStack {
-                GlowBackground()
+                PageBackground()
                 ScrollView {
-                    LazyVStack(spacing: 18) {
+                    LazyVStack(spacing: 14) {
                         CurrentGapCard()
                         QuickRecordCard(recordKind: $recordKind)
                         ProgressSummaryCard()
                         RecentEventsCard()
                     }
-                    .padding(.horizontal, 18)
-                    .padding(.top, 10)
-                    .padding(.bottom, 28)
+                    .padding(.horizontal, 16)
+                    .padding(.top, 8)
+                    .padding(.bottom, 24)
                 }
                 .refreshable { await store.refreshAll() }
             }
@@ -58,44 +58,36 @@ private struct CurrentGapCard: View {
     @EnvironmentObject private var store: AppStore
 
     var body: some View {
-        ZStack(alignment: .topTrailing) {
-            Circle()
-                .fill(GapStyle.coral.opacity(0.14))
-                .frame(width: 170, height: 170)
-                .blur(radius: 18)
-                .offset(x: 55, y: -70)
-
-            VStack(alignment: .leading, spacing: 13) {
-                HStack {
-                    Label(store.text("当前间隔", "Current gap"), systemImage: "arrow.up.right")
-                        .font(.subheadline.weight(.semibold))
-                        .foregroundStyle(GapStyle.secondary)
-                    Spacer()
-                    Text(AppDate.api.string(from: Date()))
-                        .font(.caption.monospacedDigit())
-                        .foregroundStyle(GapStyle.secondary)
-                }
-
-                HStack(alignment: .firstTextBaseline, spacing: 6) {
-                    Text("\(store.metrics.currentGap)")
-                        .font(.system(size: 72, weight: .bold, design: .rounded))
-                        .tracking(-3)
-                    Text(store.text("天", "days"))
-                        .font(.title3.weight(.bold))
-                        .foregroundStyle(GapStyle.coral)
-                }
-                .foregroundStyle(GapStyle.ink)
-
-                Text(encouragement)
-                    .font(.body.weight(.semibold))
-                    .foregroundStyle(GapStyle.ink)
-
-                Text(store.text("数字只描述时间，不评价你。", "This number describes time. It does not judge you."))
-                    .font(.caption)
+        VStack(alignment: .leading, spacing: 13) {
+            HStack {
+                Label(store.text("当前间隔", "Current gap"), systemImage: "arrow.up.right")
+                    .font(.subheadline.weight(.semibold))
+                    .foregroundStyle(GapStyle.secondary)
+                Spacer()
+                Text(AppDate.api.string(from: Date()))
+                    .font(.caption.monospacedDigit())
                     .foregroundStyle(GapStyle.secondary)
             }
-            .frame(maxWidth: .infinity, alignment: .leading)
+
+            HStack(alignment: .firstTextBaseline, spacing: 6) {
+                Text("\(store.metrics.currentGap)")
+                    .font(.system(size: 64, weight: .bold, design: .default))
+                    .tracking(-2)
+                Text(store.text("天", "days"))
+                    .font(.title3.weight(.semibold))
+                    .foregroundStyle(GapStyle.secondary)
+            }
+            .foregroundStyle(GapStyle.ink)
+
+            Text(encouragement)
+                .font(.body.weight(.semibold))
+                .foregroundStyle(GapStyle.ink)
+
+            Text(store.text("数字只描述时间，不评价你。", "This number describes time. It does not judge you."))
+                .font(.caption)
+                .foregroundStyle(GapStyle.secondary)
         }
+        .frame(maxWidth: .infinity, alignment: .leading)
         .softCard(padding: 20)
     }
 
@@ -123,13 +115,13 @@ private struct QuickRecordCard: View {
                     title: store.text("记录破例", "Record slip"),
                     subtitle: store.text("开启新间隔", "Starts a new gap"),
                     icon: "arrow.counterclockwise",
-                    color: GapStyle.coral
+                    color: GapStyle.slip
                 ) { recordKind = .slip }
                 QuickRecordButton(
                     title: store.text("记录冲动", "Record urge"),
                     subtitle: store.text("只记录发生的事实", "Record what happened"),
                     icon: "hand.raised.fill",
-                    color: GapStyle.plum
+                    color: GapStyle.urge
                 ) { recordKind = .urge }
             }
         }
@@ -147,14 +139,27 @@ private struct QuickRecordButton: View {
     var body: some View {
         Button(action: action) {
             VStack(alignment: .leading, spacing: 9) {
-                Image(systemName: icon).font(.title3.weight(.bold))
-                Text(title).font(.subheadline.weight(.bold)).lineLimit(2)
-                Text(subtitle).font(.caption).opacity(0.82).lineLimit(2)
+                Image(systemName: icon)
+                    .font(.subheadline.weight(.bold))
+                    .foregroundStyle(color)
+                    .frame(width: 34, height: 34)
+                    .background(color.opacity(0.10), in: RoundedRectangle(cornerRadius: 8, style: .continuous))
+                Text(title)
+                    .font(.subheadline.weight(.bold))
+                    .foregroundStyle(GapStyle.ink)
+                    .lineLimit(2)
+                Text(subtitle)
+                    .font(.caption)
+                    .foregroundStyle(GapStyle.secondary)
+                    .lineLimit(2)
             }
-            .frame(maxWidth: .infinity, minHeight: 100, alignment: .leading)
+            .frame(maxWidth: .infinity, minHeight: 112, alignment: .leading)
             .padding(14)
-            .foregroundStyle(.white)
-            .background(color.gradient, in: RoundedRectangle(cornerRadius: 18, style: .continuous))
+            .background(GapStyle.surface, in: RoundedRectangle(cornerRadius: GapStyle.radius, style: .continuous))
+            .overlay {
+                RoundedRectangle(cornerRadius: GapStyle.radius, style: .continuous)
+                    .stroke(GapStyle.line, lineWidth: 1)
+            }
         }
         .buttonStyle(.plain)
         .sensoryFeedback(.selection, trigger: false)
@@ -168,8 +173,8 @@ private struct ProgressSummaryCard: View {
         VStack(alignment: .leading, spacing: 15) {
             SectionTitle(store.text("变化概览", "Progress at a glance"))
             HStack(spacing: 10) {
-                MetricTile(value: store.metrics.bestGap, label: store.text("最长", "Best"), color: GapStyle.coral)
-                MetricTile(value: store.metrics.averageGap, label: store.text("平均", "Average"), color: GapStyle.plum)
+                MetricTile(value: store.metrics.bestGap, label: store.text("最长", "Best"), color: GapStyle.warning)
+                MetricTile(value: store.metrics.averageGap, label: store.text("平均", "Average"), color: GapStyle.info)
                 MetricTile(value: store.metrics.urgesLastSevenDays, label: store.text("近7天控制住", "Controlled in 7d"), color: GapStyle.ink)
             }
         }
@@ -194,7 +199,11 @@ struct MetricTile: View {
         }
         .frame(maxWidth: .infinity, minHeight: 72, alignment: .leading)
         .padding(12)
-        .background(color.opacity(0.07), in: RoundedRectangle(cornerRadius: 16, style: .continuous))
+        .background(GapStyle.surfaceSoft, in: RoundedRectangle(cornerRadius: GapStyle.radius, style: .continuous))
+        .overlay {
+            RoundedRectangle(cornerRadius: GapStyle.radius, style: .continuous)
+                .stroke(GapStyle.line.opacity(0.7), lineWidth: 1)
+        }
     }
 }
 
@@ -230,11 +239,11 @@ struct EventCompactRow: View {
         HStack(spacing: 12) {
             Image(systemName: event.kind == .slip ? "arrow.counterclockwise" : "hand.raised.fill")
                 .font(.subheadline.weight(.bold))
-                .foregroundStyle(event.kind == .slip ? GapStyle.coral : GapStyle.plum)
+                .foregroundStyle(event.kind == .slip ? GapStyle.slip : GapStyle.urge)
                 .frame(width: 38, height: 38)
                 .background(
-                    (event.kind == .slip ? GapStyle.coralSoft : GapStyle.plumSoft),
-                    in: RoundedRectangle(cornerRadius: 12, style: .continuous)
+                    (event.kind == .slip ? GapStyle.slipSoft : GapStyle.urgeSoft),
+                    in: RoundedRectangle(cornerRadius: 8, style: .continuous)
                 )
             VStack(alignment: .leading, spacing: 3) {
                 Text(event.kind == .slip ? store.text("破例", "Slip") : store.text("冲动", "Urge"))

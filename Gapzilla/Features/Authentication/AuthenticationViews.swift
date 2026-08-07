@@ -29,7 +29,7 @@ struct WelcomeView: View {
 
     var body: some View {
         ZStack {
-            GlowBackground()
+            PageBackground()
             ScrollView {
                 VStack(alignment: .leading, spacing: 0) {
                     HStack {
@@ -43,8 +43,11 @@ struct WelcomeView: View {
                                 .font(.body.weight(.semibold))
                                 .foregroundStyle(GapStyle.ink)
                                 .frame(width: 42, height: 42)
-                                .background(.white, in: Circle())
-                                .overlay { Circle().stroke(GapStyle.line) }
+                                .background(GapStyle.surface, in: RoundedRectangle(cornerRadius: 8, style: .continuous))
+                                .overlay {
+                                    RoundedRectangle(cornerRadius: 8, style: .continuous)
+                                        .stroke(GapStyle.line, lineWidth: 1)
+                                }
                         }
                     }
                     .padding(.bottom, 48)
@@ -52,11 +55,11 @@ struct WelcomeView: View {
                     Text(store.text("记录事实，不做审判", "FACTS, NOT JUDGMENT"))
                         .font(.caption.weight(.bold))
                         .tracking(0.7)
-                        .foregroundStyle(GapStyle.coral)
+                        .foregroundStyle(GapStyle.info)
 
                     Text(store.text("别追求从不破例，\n只看间隔是否正在变长", "Stop chasing perfection\nWatch the gaps grow"))
-                        .font(.system(size: 42, weight: .heavy, design: .rounded))
-                        .tracking(-1.4)
+                        .font(.system(size: 38, weight: .bold, design: .default))
+                        .tracking(-1)
                         .foregroundStyle(GapStyle.ink)
                         .padding(.top, 10)
                         .fixedSize(horizontal: false, vertical: true)
@@ -79,12 +82,8 @@ struct WelcomeView: View {
                         authMode = .login
                     } label: {
                         Text(store.text("使用 Gapzilla 账号登录", "Use a Gapzilla account"))
-                            .font(.headline)
-                            .frame(maxWidth: .infinity)
-                            .frame(height: 54)
-                            .foregroundStyle(.white)
-                            .background(GapStyle.coral, in: RoundedRectangle(cornerRadius: 16, style: .continuous))
                     }
+                    .buttonStyle(PrimaryActionButtonStyle())
                     .padding(.top, 10)
 
                     Button {
@@ -104,7 +103,7 @@ struct WelcomeView: View {
                     .font(.caption.weight(.semibold))
                     .foregroundStyle(GapStyle.secondary)
                     .symbolRenderingMode(.monochrome)
-                    .tint(GapStyle.coral)
+                    .tint(GapStyle.slip)
                     .padding(.top, 18)
 
                     Link(
@@ -128,19 +127,19 @@ struct WelcomeView: View {
                 VStack(spacing: 12) {
                     ProgressView()
                         .controlSize(.large)
-                        .tint(GapStyle.coral)
+                        .tint(GapStyle.info)
                     Text(store.text("正在登录…", "Signing in…"))
                         .font(.headline)
                         .foregroundStyle(GapStyle.ink)
                 }
                 .padding(.horizontal, 28)
                 .padding(.vertical, 22)
-                .background(.ultraThinMaterial, in: RoundedRectangle(cornerRadius: 22, style: .continuous))
+                .background(GapStyle.surface, in: RoundedRectangle(cornerRadius: GapStyle.cardRadius, style: .continuous))
                 .overlay {
-                    RoundedRectangle(cornerRadius: 22, style: .continuous)
+                    RoundedRectangle(cornerRadius: GapStyle.cardRadius, style: .continuous)
                         .stroke(GapStyle.line, lineWidth: 1)
                 }
-                .shadow(color: GapStyle.ink.opacity(0.08), radius: 22, y: 10)
+                .shadow(color: GapStyle.ink.opacity(0.06), radius: 12, y: 4)
                 .transition(.opacity)
             }
         }
@@ -182,10 +181,10 @@ struct AppleAuthorizationButton: View {
         }
         .signInWithAppleButtonStyle(.white)
         .frame(maxWidth: .infinity)
-        .frame(height: 54)
-        .clipShape(RoundedRectangle(cornerRadius: 16, style: .continuous))
+        .frame(height: 52)
+        .clipShape(RoundedRectangle(cornerRadius: GapStyle.radius, style: .continuous))
         .overlay {
-            RoundedRectangle(cornerRadius: 16, style: .continuous)
+            RoundedRectangle(cornerRadius: GapStyle.radius, style: .continuous)
                 .stroke(GapStyle.line, lineWidth: 1)
         }
         .disabled(store.isBusy)
@@ -277,7 +276,7 @@ struct AppleAccountChoiceView: View {
     var body: some View {
         NavigationStack {
             ZStack {
-                GlowBackground()
+                PageBackground()
                 ScrollView {
                     VStack(alignment: .leading, spacing: 22) {
                         Image(systemName: "apple.logo")
@@ -392,9 +391,9 @@ struct AppleAccountChoiceView: View {
             HStack(spacing: 14) {
                 Image(systemName: icon)
                     .font(.title3.weight(.semibold))
-                    .foregroundStyle(GapStyle.coral)
+                    .foregroundStyle(GapStyle.info)
                     .frame(width: 44, height: 44)
-                    .background(GapStyle.coralSoft, in: Circle())
+                    .background(GapStyle.infoSoft, in: RoundedRectangle(cornerRadius: 8, style: .continuous))
                 VStack(alignment: .leading, spacing: 4) {
                     Text(title).font(.headline).foregroundStyle(GapStyle.ink)
                     Text(subtitle).font(.subheadline).foregroundStyle(GapStyle.secondary)
@@ -403,8 +402,11 @@ struct AppleAccountChoiceView: View {
                 Image(systemName: "chevron.right").foregroundStyle(GapStyle.secondary)
             }
             .padding(16)
-            .background(.white, in: RoundedRectangle(cornerRadius: 18, style: .continuous))
-            .overlay { RoundedRectangle(cornerRadius: 18).stroke(GapStyle.line) }
+            .background(GapStyle.surface, in: RoundedRectangle(cornerRadius: GapStyle.radius, style: .continuous))
+            .overlay {
+                RoundedRectangle(cornerRadius: GapStyle.radius, style: .continuous)
+                    .stroke(GapStyle.line, lineWidth: 1)
+            }
         }
         .buttonStyle(.plain)
     }
@@ -415,12 +417,8 @@ struct AppleAccountChoiceView: View {
                 if store.isBusy { ProgressView().tint(.white) }
                 Text(title)
             }
-            .font(.headline)
-            .frame(maxWidth: .infinity)
-            .frame(height: 54)
-            .foregroundStyle(.white)
-            .background(GapStyle.coral, in: RoundedRectangle(cornerRadius: 16, style: .continuous))
         }
+        .buttonStyle(PrimaryActionButtonStyle())
         .disabled(disabled || store.isBusy)
     }
 }
@@ -437,18 +435,18 @@ private struct CurrentGapPreview: View {
                 Spacer()
                 Text("Gapzilla")
                     .font(.caption2.weight(.bold))
-                    .foregroundStyle(.white)
+                    .foregroundStyle(GapStyle.ink)
                     .padding(.horizontal, 10)
                     .padding(.vertical, 6)
-                    .background(GapStyle.plum, in: Capsule())
+                    .background(GapStyle.surfaceSoft, in: Capsule())
             }
             HStack(alignment: .firstTextBaseline, spacing: 5) {
                 Text("23")
-                    .font(.system(size: 58, weight: .bold, design: .rounded))
+                    .font(.system(size: 58, weight: .bold, design: .default))
                     .foregroundStyle(GapStyle.ink)
                 Text(store.text("天", "days"))
                     .font(.headline)
-                    .foregroundStyle(GapStyle.coral)
+                    .foregroundStyle(GapStyle.info)
             }
             VStack(spacing: 8) {
                 PreviewBar(label: "7", fraction: 0.38)
@@ -474,7 +472,7 @@ private struct PreviewBar: View {
                 Capsule()
                     .fill(GapStyle.line.opacity(0.65))
                     .overlay(alignment: .leading) {
-                        Capsule().fill(GapStyle.coral.gradient).frame(width: proxy.size.width * fraction)
+                        Capsule().fill(GapStyle.info).frame(width: proxy.size.width * fraction)
                     }
             }
             .frame(height: 7)
@@ -496,7 +494,7 @@ struct AuthenticationView: View {
     var body: some View {
         NavigationStack {
             ZStack {
-                GlowBackground()
+                PageBackground()
                 ScrollView {
                     VStack(alignment: .leading, spacing: 22) {
                         LogoMark(size: 54)
@@ -551,14 +549,9 @@ struct AuthenticationView: View {
                                 if store.isBusy { ProgressView().tint(.white) }
                                 Text(mode == .login ? store.text("登录", "Log in") : store.text("创建账号", "Create account"))
                             }
-                            .font(.headline)
-                            .frame(maxWidth: .infinity)
-                            .frame(height: 54)
-                            .foregroundStyle(.white)
-                            .background(GapStyle.coral, in: RoundedRectangle(cornerRadius: 16, style: .continuous))
                         }
+                        .buttonStyle(PrimaryActionButtonStyle())
                         .disabled(store.isBusy || username.isEmpty || password.isEmpty || (mode == .register && nickname.isEmpty))
-                        .opacity(username.isEmpty || password.isEmpty ? 0.55 : 1)
                     }
                     .padding(24)
                 }
@@ -584,11 +577,15 @@ private struct InputField: View {
         HStack(spacing: 12) {
             Image(systemName: icon).foregroundStyle(GapStyle.secondary)
             TextField(title, text: $text)
+                .textFieldStyle(.plain)
         }
         .padding(.horizontal, 16)
-        .frame(height: 54)
-        .background(.white, in: RoundedRectangle(cornerRadius: 16, style: .continuous))
-        .overlay { RoundedRectangle(cornerRadius: 16).stroke(GapStyle.line) }
+        .frame(height: 52)
+        .background(GapStyle.surface, in: RoundedRectangle(cornerRadius: GapStyle.radius, style: .continuous))
+        .overlay {
+            RoundedRectangle(cornerRadius: GapStyle.radius, style: .continuous)
+                .stroke(GapStyle.line, lineWidth: 1)
+        }
     }
 }
 
@@ -600,11 +597,15 @@ private struct SecureInputField: View {
         HStack(spacing: 12) {
             Image(systemName: "lock").foregroundStyle(GapStyle.secondary)
             SecureField(title, text: $text)
+                .textFieldStyle(.plain)
         }
         .padding(.horizontal, 16)
-        .frame(height: 54)
-        .background(.white, in: RoundedRectangle(cornerRadius: 16, style: .continuous))
-        .overlay { RoundedRectangle(cornerRadius: 16).stroke(GapStyle.line) }
+        .frame(height: 52)
+        .background(GapStyle.surface, in: RoundedRectangle(cornerRadius: GapStyle.radius, style: .continuous))
+        .overlay {
+            RoundedRectangle(cornerRadius: GapStyle.radius, style: .continuous)
+                .stroke(GapStyle.line, lineWidth: 1)
+        }
     }
 }
 
@@ -614,13 +615,13 @@ struct GoalSetupView: View {
 
     var body: some View {
         ZStack {
-            GlowBackground()
+            PageBackground()
             VStack(alignment: .leading, spacing: 24) {
                 BrandLockup()
                 Spacer()
                 Image(systemName: "scope")
                     .font(.system(size: 34, weight: .bold))
-                    .foregroundStyle(GapStyle.coral)
+                    .foregroundStyle(GapStyle.info)
                 SectionTitle(
                     store.text("你想让什么间隔变长？", "Which gap do you want to grow?"),
                     subtitle: store.text("目标只是一个观察范围，不是对自己的评判。", "A goal is an observation boundary, not a judgment.")
@@ -630,12 +631,8 @@ struct GoalSetupView: View {
                     Task { _ = await store.createGoal(name: name) }
                 } label: {
                     Text(store.text("创建第一个目标", "Create first goal"))
-                        .font(.headline)
-                        .frame(maxWidth: .infinity)
-                        .frame(height: 54)
-                        .foregroundStyle(.white)
-                        .background(GapStyle.coral, in: RoundedRectangle(cornerRadius: 16, style: .continuous))
                 }
+                .buttonStyle(PrimaryActionButtonStyle())
                 .disabled(name.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty || store.isBusy)
                 Spacer()
                 Button(store.text("退出登录", "Log out")) { Task { await store.logout() } }
