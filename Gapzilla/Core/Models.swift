@@ -113,6 +113,7 @@ struct DeletedGoalData: Decodable {
 
 enum EventKind: Int, Codable, CaseIterable, Identifiable {
     case slip = 1
+    // A raw observation that an urge occurred. This is not a "controlled" outcome.
     case urge = 2
 
     var id: Int { rawValue }
