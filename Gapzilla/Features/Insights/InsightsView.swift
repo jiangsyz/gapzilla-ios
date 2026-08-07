@@ -11,17 +11,29 @@ struct InsightsView: View {
         NavigationStack {
             ZStack {
                 PageBackground()
-                ScrollView {
-                    LazyVStack(spacing: 14) {
-                        InsightHeroCard()
-                        GapTrendCard()
-                        UrgeEvidenceCard()
+                ScrollViewReader { proxy in
+                    ScrollView {
+                        LazyVStack(spacing: 14) {
+                            InsightHeroCard()
+                            GapTrendCard()
+                            UrgeEvidenceCard()
+                                .id("urge-evidence-card")
+                        }
+                        .padding(.horizontal, 16)
+                        .padding(.top, 8)
+                        .padding(.bottom, 24)
                     }
-                    .padding(.horizontal, 16)
-                    .padding(.top, 8)
-                    .padding(.bottom, 24)
+                    .refreshable { await store.refreshAll() }
+                    .onAppear {
+#if DEBUG
+                        if ProcessInfo.processInfo.arguments.contains("--ui-preview-insights-bars") {
+                            DispatchQueue.main.async {
+                                proxy.scrollTo("urge-evidence-card", anchor: .top)
+                            }
+                        }
+#endif
+                    }
                 }
-                .refreshable { await store.refreshAll() }
             }
             .navigationTitle(store.text("分析", "Insights"))
             .navigationBarTitleDisplayMode(.large)
@@ -268,15 +280,28 @@ private struct UrgeEvidenceCard: View {
                 )
                 .foregroundStyle(GapStyle.urge)
                 .cornerRadius(3)
+                .annotation(position: .top, spacing: 4) {
+                    if item.count > 0 {
+                        Text("\(item.count)")
+                            .font(.caption2.weight(.semibold))
+                            .foregroundStyle(GapStyle.urge)
+                    }
+                }
             }
-            .chartYAxis(.hidden)
+            .chartYScale(domain: 0...yAxisUpperBound)
+            .chartYAxis {
+                AxisMarks(position: .leading, values: .automatic(desiredCount: 4)) { _ in
+                    AxisGridLine().foregroundStyle(GapStyle.line)
+                    AxisValueLabel().foregroundStyle(GapStyle.secondary)
+                }
+            }
             .chartXAxis {
                 AxisMarks(values: months.map { monthLabel(for: $0.month) }) { _ in
                     AxisValueLabel()
                 }
             }
             .chartXScale(range: .plotDimension(startPadding: 12, endPadding: 12))
-            .frame(height: 130)
+            .frame(height: 150)
         }
         .softCard()
     }
@@ -296,6 +321,11 @@ private struct UrgeEvidenceCard: View {
         .dateTime
             .month(.abbreviated)
             .locale(Locale(identifier: store.language.rawValue))
+    }
+
+    private var yAxisUpperBound: Int {
+        let maximum = months.map(\.count).max() ?? 0
+        return max(1, maximum + max(1, maximum / 4))
     }
 
     private func monthLabel(for month: Date) -> String {
