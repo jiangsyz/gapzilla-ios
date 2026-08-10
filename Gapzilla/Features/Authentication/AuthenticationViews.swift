@@ -696,12 +696,21 @@ private enum RegistrationRuleState {
     case satisfied
     case invalid
 
-    var color: Color {
+    var iconColor: Color {
         switch self {
         case .neutral:
             GapStyle.secondary
         case .satisfied:
             GapStyle.urge
+        case .invalid:
+            GapStyle.danger
+        }
+    }
+
+    var textColor: Color {
+        switch self {
+        case .neutral, .satisfied:
+            GapStyle.secondary
         case .invalid:
             GapStyle.danger
         }
@@ -743,10 +752,14 @@ private struct RegistrationRuleLabel: View {
     let state: RegistrationRuleState
 
     var body: some View {
-        Label(text, systemImage: state.symbol)
-            .font(.caption.weight(.medium))
-            .foregroundStyle(state.color)
-            .animation(.easeOut(duration: 0.16), value: state.symbol)
+        HStack(spacing: 5) {
+            Image(systemName: state.symbol)
+                .foregroundStyle(state.iconColor)
+            Text(text)
+                .foregroundStyle(state.textColor)
+        }
+        .font(.caption.weight(.medium))
+        .animation(.easeOut(duration: 0.16), value: state.symbol)
     }
 }
 
