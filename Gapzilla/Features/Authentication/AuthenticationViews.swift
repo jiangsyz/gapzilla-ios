@@ -1,6 +1,7 @@
 import AuthenticationServices
 import CryptoKit
 import SwiftUI
+import zxcvbn
 
 enum AuthenticationMode: String, CaseIterable, Identifiable {
     case login
@@ -249,12 +250,6 @@ struct AppleAccountChoiceView: View {
     @State private var step: AppleAccountChoiceStep = .prompt
     @State private var username = ""
     @State private var password = ""
-    @State private var nickname: String
-
-    init(choice: AppleAccountChoice) {
-        self.choice = choice
-        _nickname = State(initialValue: choice.suggestedNickname)
-    }
 
     var body: some View {
         NavigationStack {
@@ -344,12 +339,11 @@ struct AppleAccountChoiceView: View {
         VStack(alignment: .leading, spacing: 18) {
             backButton
             SectionTitle(
-                store.text("创建新账号", "Create a new account"),
-                subtitle: store.text("只需要一个显示昵称，不会强迫你再设置用户名和密码。", "Choose a display name. You do not need to create a username and password.")
+                "创建新账号",
+                subtitle: "将使用 Apple 账号创建 Gapzilla 账号，无需填写昵称、用户名或密码。"
             )
-            InputField(title: store.text("昵称", "Nickname"), icon: "face.smiling", text: $nickname)
-            primaryButton(store.text("创建并继续", "Create and continue"), disabled: nickname.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty) {
-                Task { _ = await store.createAppleAccount(choice: choice, nickname: nickname) }
+            primaryButton("创建并继续", disabled: false) {
+                Task { _ = await store.createAppleAccount(choice: choice) }
             }
         }
     }
@@ -475,11 +469,15 @@ enum RegistrationPasswordStrength: Int, CaseIterable {
     }
 }
 
+enum RegistrationPasswordIssue: Equatable {
+    case tooShort(remaining: Int)
+    case tooLong
+    case unsupportedCharacters
+}
+
 enum RegistrationInputRules {
     static let usernameRange = 3...20
-    static let nicknameRange = 1...64
-    static let passwordMinimumLength = 8
-    static let passwordTechnicalMaxBytes = 72
+    static let passwordRange = 8...20
 
     static func isUsernameValid(_ username: String) -> Bool {
         guard usernameRange.contains(username.count) else { return false }
@@ -491,55 +489,42 @@ enum RegistrationInputRules {
         }
     }
 
-    static func isNicknameValid(_ nickname: String) -> Bool {
-        let trimmed = nickname.trimmingCharacters(in: .whitespacesAndNewlines)
-        return !trimmed.isEmpty && nicknameRange.contains(nickname.count)
-    }
-
-    static func passwordByteCount(_ password: String) -> Int {
-        password.utf8.count
+    static func hasSupportedPasswordCharacters(_ password: String) -> Bool {
+        !password.isEmpty && password.unicodeScalars.allSatisfy { scalar in
+            (33...126).contains(scalar.value)
+        }
     }
 
     static func isPasswordValid(_ password: String) -> Bool {
-        password.count >= passwordMinimumLength
-            && passwordByteCount(password) <= passwordTechnicalMaxBytes
+        passwordRange.contains(password.count)
+            && hasSupportedPasswordCharacters(password)
     }
 
-    static func passwordStrength(_ password: String) -> RegistrationPasswordStrength {
-        guard !password.isEmpty else { return .empty }
-
-        let characterCount = password.count
-        guard characterCount >= passwordMinimumLength,
-              passwordByteCount(password) <= passwordTechnicalMaxBytes else { return .weak }
-
-        let classes = characterClassCount(password)
-        if characterCount >= 16 && classes >= 3 { return .strong }
-        if characterCount >= 12 && classes >= 2 { return .good }
-        return .usable
-    }
-
-    private static func characterClassCount(_ password: String) -> Int {
-        var containsLowercase = false
-        var containsUppercase = false
-        var containsNumber = false
-        var containsSymbol = false
-
-        for scalar in password.unicodeScalars {
-            switch scalar.value {
-            case 97...122:
-                containsLowercase = true
-            case 65...90:
-                containsUppercase = true
-            case 48...57:
-                containsNumber = true
-            default:
-                containsSymbol = true
-            }
+    static func passwordIssue(_ password: String) -> RegistrationPasswordIssue? {
+        guard !password.isEmpty else { return nil }
+        guard hasSupportedPasswordCharacters(password) else { return .unsupportedCharacters }
+        if password.count < passwordRange.lowerBound {
+            return .tooShort(remaining: passwordRange.lowerBound - password.count)
         }
+        if password.count > passwordRange.upperBound { return .tooLong }
+        return nil
+    }
 
-        return [containsLowercase, containsUppercase, containsNumber, containsSymbol]
-            .filter { $0 }
-            .count
+    static func passwordStrength(
+        _ password: String,
+        username: String = ""
+    ) -> RegistrationPasswordStrength {
+        guard !password.isEmpty else { return .empty }
+        guard isPasswordValid(password) else { return .weak }
+
+        let userInputs = [username.lowercased(), "gapzilla", "quietbase"]
+            .filter { !$0.isEmpty }
+        switch zxcvbn(password, userInputs: userInputs).score ?? 0 {
+        case 0...1: return .weak
+        case 2: return .usable
+        case 3: return .good
+        default: return .strong
+        }
     }
 }
 
@@ -549,10 +534,9 @@ struct AuthenticationView: View {
     @State var mode: AuthenticationMode
     @State private var username = ""
     @State private var password = ""
-    @State private var nickname = ""
     @FocusState private var focusedField: Field?
 
-    private enum Field { case username, nickname, password }
+    private enum Field { case username, password }
 
     var body: some View {
         NavigationStack {
@@ -579,25 +563,7 @@ struct AuthenticationView: View {
                                 RegistrationUsernameField(text: $username)
                                     .focused($focusedField, equals: .username)
 
-                                VStack(alignment: .leading, spacing: 7) {
-                                    InputField(
-                                        title: "昵称",
-                                        icon: "face.smiling",
-                                        text: $nickname,
-                                        borderColor: nickname.count > RegistrationInputRules.nicknameRange.upperBound
-                                            ? GapStyle.danger.opacity(0.65)
-                                            : GapStyle.line
-                                    )
-                                    .focused($focusedField, equals: .nickname)
-
-                                    if nickname.count > RegistrationInputRules.nicknameRange.upperBound {
-                                        Label("昵称过长，请缩短", systemImage: "xmark.circle.fill")
-                                            .font(.caption.weight(.medium))
-                                            .foregroundStyle(GapStyle.danger)
-                                    }
-                                }
-
-                                RegistrationPasswordField(text: $password)
+                                RegistrationPasswordField(text: $password, username: username)
                                     .focused($focusedField, equals: .password)
                             } else {
                                 InputField(
@@ -621,7 +587,7 @@ struct AuthenticationView: View {
                             Task {
                                 let succeeded = mode == .login
                                     ? await store.login(username: username, password: password)
-                                    : await store.register(username: username, password: password, nickname: nickname)
+                                    : await store.register(username: username, password: password)
                                 if succeeded { dismiss() }
                             }
                         } label: {
@@ -654,7 +620,6 @@ struct AuthenticationView: View {
             return username.isEmpty || password.isEmpty
         case .register:
             return !RegistrationInputRules.isUsernameValid(username)
-                || !RegistrationInputRules.isNicknameValid(nickname)
                 || !RegistrationInputRules.isPasswordValid(password)
         }
     }
@@ -686,6 +651,8 @@ private struct SecureInputField: View {
     let title: String
     @Binding var text: String
     var borderColor: Color = GapStyle.line
+    var usesASCIICapableKeyboard = false
+    var isNewPassword = false
     @State private var isRevealed = false
 
     var body: some View {
@@ -699,6 +666,10 @@ private struct SecureInputField: View {
                 }
             }
             .textFieldStyle(.plain)
+            .keyboardType(usesASCIICapableKeyboard ? .asciiCapable : .default)
+            .textInputAutocapitalization(.never)
+            .autocorrectionDisabled()
+            .textContentType(isNewPassword ? .newPassword : .password)
 
             Button {
                 isRevealed.toggle()
@@ -836,21 +807,21 @@ private struct RegistrationUsernameField: View {
 
 private struct RegistrationPasswordField: View {
     @Binding var text: String
-
-    private var byteCount: Int {
-        RegistrationInputRules.passwordByteCount(text)
-    }
+    let username: String
 
     private var isValid: Bool {
         RegistrationInputRules.isPasswordValid(text)
     }
 
     private var strength: RegistrationPasswordStrength {
-        RegistrationInputRules.passwordStrength(text)
+        RegistrationInputRules.passwordStrength(text, username: username)
+    }
+
+    private var issue: RegistrationPasswordIssue? {
+        RegistrationInputRules.passwordIssue(text)
     }
 
     private var strengthColor: Color {
-        if byteCount > RegistrationInputRules.passwordTechnicalMaxBytes { return GapStyle.danger }
         return switch strength {
         case .empty:
             GapStyle.line
@@ -866,7 +837,6 @@ private struct RegistrationPasswordField: View {
     }
 
     private var strengthText: String {
-        if byteCount > RegistrationInputRules.passwordTechnicalMaxBytes { return "密码过长" }
         return switch strength {
         case .empty:
             "输入后显示强度"
@@ -881,42 +851,73 @@ private struct RegistrationPasswordField: View {
         }
     }
 
-    private var ruleState: RegistrationRuleState {
+    private var lengthRuleState: RegistrationRuleState {
         if text.isEmpty { return .neutral }
-        return isValid ? .satisfied : .invalid
+        return RegistrationInputRules.passwordRange.contains(text.count) ? .satisfied : .invalid
+    }
+
+    private var characterRuleState: RegistrationRuleState {
+        if text.isEmpty { return .neutral }
+        return RegistrationInputRules.hasSupportedPasswordCharacters(text) ? .satisfied : .invalid
+    }
+
+    private var lengthRuleText: String {
+        switch issue {
+        case let .tooShort(remaining):
+            "还需 \(remaining) 个字符"
+        case .tooLong:
+            "最多 20 个字符"
+        default:
+            "8–20 个字符"
+        }
     }
 
     var body: some View {
         VStack(alignment: .leading, spacing: 8) {
-            Text("密码")
-                .font(.subheadline.weight(.semibold))
-                .foregroundStyle(GapStyle.ink)
+            RegistrationFieldHeader(
+                title: "密码",
+                count: "\(text.count) / 20",
+                countColor: text.count > RegistrationInputRules.passwordRange.upperBound
+                    ? GapStyle.danger
+                    : GapStyle.secondary
+            )
             SecureInputField(
                 title: "输入密码",
                 text: $text,
-                borderColor: text.isEmpty || isValid ? GapStyle.line : GapStyle.danger.opacity(0.65)
+                borderColor: text.isEmpty || isValid ? GapStyle.line : GapStyle.danger.opacity(0.65),
+                usesASCIICapableKeyboard: true,
+                isNewPassword: true
             )
 
             PasswordStrengthMeter(
                 strength: strength,
                 color: strengthColor,
-                label: strengthText,
-                fillsAllSegments: byteCount > RegistrationInputRules.passwordTechnicalMaxBytes
+                label: strengthText
             )
 
-            HStack(alignment: .firstTextBaseline) {
-                RegistrationRuleLabel(
-                    text: byteCount > RegistrationInputRules.passwordTechnicalMaxBytes
-                        ? "密码过长，请缩短"
-                        : "至少 8 位",
-                    state: ruleState
-                )
-                Spacer()
-                if isValid {
-                    Text("强度仅作提示")
-                        .font(.caption)
-                        .foregroundStyle(GapStyle.secondary)
+            ViewThatFits(in: .horizontal) {
+                HStack(spacing: 14) {
+                    RegistrationRuleLabel(text: lengthRuleText, state: lengthRuleState)
+                    RegistrationRuleLabel(
+                        text: "英文字母、数字或半角符号",
+                        state: characterRuleState
+                    )
                 }
+                VStack(alignment: .leading, spacing: 5) {
+                    RegistrationRuleLabel(text: lengthRuleText, state: lengthRuleState)
+                    RegistrationRuleLabel(
+                        text: issue == .unsupportedCharacters
+                            ? "不支持中文、空格或全角字符"
+                            : "英文字母、数字或半角符号",
+                        state: characterRuleState
+                    )
+                }
+            }
+
+            if isValid {
+                Text("强度仅作提示，不限制字符组合")
+                    .font(.caption)
+                    .foregroundStyle(GapStyle.secondary)
             }
         }
     }
@@ -926,7 +927,6 @@ private struct PasswordStrengthMeter: View {
     let strength: RegistrationPasswordStrength
     let color: Color
     let label: String
-    let fillsAllSegments: Bool
 
     var body: some View {
         HStack(spacing: 10) {
@@ -948,7 +948,7 @@ private struct PasswordStrengthMeter: View {
     }
 
     private var filledSegments: Int {
-        fillsAllSegments ? 4 : strength.filledSegments
+        strength.filledSegments
     }
 }
 

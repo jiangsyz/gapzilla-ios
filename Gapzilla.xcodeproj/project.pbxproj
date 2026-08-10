@@ -23,6 +23,7 @@
 		A1000000000000000000000F /* APIClientTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = B10000000000000000000011 /* APIClientTests.swift */; };
 		A10000000000000000000010 /* Localizable.strings in Resources */ = {isa = PBXBuildFile; fileRef = H10000000000000000000001 /* Localizable.strings */; };
 		A10000000000000000000011 /* AuthenticationInputRulesTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = B10000000000000000000014 /* AuthenticationInputRulesTests.swift */; };
+		A10000000000000000000012 /* zxcvbn in Frameworks */ = {isa = PBXBuildFile; productRef = P20000000000000000000001 /* zxcvbn */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -62,7 +63,9 @@
 		C10000000000000000000001 /* Frameworks */ = {
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
-			files = ();
+			files = (
+				A10000000000000000000012 /* zxcvbn in Frameworks */,
+			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 		C10000000000000000000005 /* Frameworks */ = {
@@ -129,6 +132,9 @@
 			buildRules = ();
 			dependencies = ();
 			name = Gapzilla;
+			packageProductDependencies = (
+				P20000000000000000000001 /* zxcvbn */,
+			);
 			productName = Gapzilla;
 			productReference = B1000000000000000000000E /* Gapzilla.app */;
 			productType = "com.apple.product-type.application";
@@ -176,6 +182,9 @@
 			knownRegions = (en, "zh-Hans", Base);
 			mainGroup = D10000000000000000000001;
 			productRefGroup = D10000000000000000000002 /* Products */;
+			packageReferences = (
+				P10000000000000000000001 /* XCRemoteSwiftPackageReference "zxcvbn-swift" */,
+			);
 			projectDirPath = "";
 			projectRoot = "";
 			targets = (
@@ -406,6 +415,25 @@
 			sourceTree = "<group>";
 		};
 /* End PBXVariantGroup section */
+
+/* Begin XCRemoteSwiftPackageReference section */
+		P10000000000000000000001 /* XCRemoteSwiftPackageReference "zxcvbn-swift" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/DeVitoC/zxcvbn-swift";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 1.00.02;
+			};
+		};
+/* End XCRemoteSwiftPackageReference section */
+
+/* Begin XCSwiftPackageProductDependency section */
+		P20000000000000000000001 /* zxcvbn */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = P10000000000000000000001 /* XCRemoteSwiftPackageReference "zxcvbn-swift" */;
+			productName = zxcvbn;
+		};
+/* End XCSwiftPackageProductDependency section */
 	};
 	rootObject = E10000000000000000000002 /* Project object */;
 }
