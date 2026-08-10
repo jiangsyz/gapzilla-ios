@@ -22,6 +22,7 @@
 		A1000000000000000000000E /* GoalMetricsTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = B1000000000000000000000F /* GoalMetricsTests.swift */; };
 		A1000000000000000000000F /* APIClientTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = B10000000000000000000011 /* APIClientTests.swift */; };
 		A10000000000000000000010 /* Localizable.strings in Resources */ = {isa = PBXBuildFile; fileRef = H10000000000000000000001 /* Localizable.strings */; };
+		A10000000000000000000011 /* AuthenticationInputRulesTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = B10000000000000000000014 /* AuthenticationInputRulesTests.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -44,6 +45,7 @@
 		B10000000000000000000011 /* APIClientTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GapzillaTests/APIClientTests.swift; sourceTree = "<group>"; };
 		B10000000000000000000012 /* en */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = en; path = Gapzilla/Resources/en.lproj/Localizable.strings; sourceTree = "<group>"; };
 		B10000000000000000000013 /* zh-Hans */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = "zh-Hans"; path = "Gapzilla/Resources/zh-Hans.lproj/Localizable.strings"; sourceTree = "<group>"; };
+		B10000000000000000000014 /* AuthenticationInputRulesTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GapzillaTests/AuthenticationInputRulesTests.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXContainerItemProxy section */
@@ -108,6 +110,7 @@
 			children = (
 				B1000000000000000000000F /* GoalMetricsTests.swift */,
 				B10000000000000000000011 /* APIClientTests.swift */,
+				B10000000000000000000014 /* AuthenticationInputRulesTests.swift */,
 			);
 			name = GapzillaTests;
 			sourceTree = "<group>";
@@ -226,6 +229,7 @@
 			files = (
 				A1000000000000000000000E /* GoalMetricsTests.swift in Sources */,
 				A1000000000000000000000F /* APIClientTests.swift in Sources */,
+				A10000000000000000000011 /* AuthenticationInputRulesTests.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

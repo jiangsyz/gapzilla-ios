@@ -463,6 +463,86 @@ private struct PreviewBar: View {
     }
 }
 
+enum RegistrationPasswordStrength: Int, CaseIterable {
+    case empty
+    case weak
+    case usable
+    case good
+    case strong
+
+    var filledSegments: Int {
+        max(0, rawValue)
+    }
+}
+
+enum RegistrationInputRules {
+    static let usernameRange = 3...20
+    static let nicknameRange = 1...64
+    static let passwordMinimumLength = 8
+    static let passwordTechnicalMaxBytes = 72
+
+    static func isUsernameValid(_ username: String) -> Bool {
+        guard usernameRange.contains(username.count) else { return false }
+        return username.unicodeScalars.allSatisfy { scalar in
+            let value = scalar.value
+            return (97...122).contains(value)
+                || (48...57).contains(value)
+                || value == 95
+        }
+    }
+
+    static func isNicknameValid(_ nickname: String) -> Bool {
+        let trimmed = nickname.trimmingCharacters(in: .whitespacesAndNewlines)
+        return !trimmed.isEmpty && nicknameRange.contains(nickname.count)
+    }
+
+    static func passwordByteCount(_ password: String) -> Int {
+        password.utf8.count
+    }
+
+    static func isPasswordValid(_ password: String) -> Bool {
+        password.count >= passwordMinimumLength
+            && passwordByteCount(password) <= passwordTechnicalMaxBytes
+    }
+
+    static func passwordStrength(_ password: String) -> RegistrationPasswordStrength {
+        guard !password.isEmpty else { return .empty }
+
+        let characterCount = password.count
+        guard characterCount >= passwordMinimumLength,
+              passwordByteCount(password) <= passwordTechnicalMaxBytes else { return .weak }
+
+        let classes = characterClassCount(password)
+        if characterCount >= 16 && classes >= 3 { return .strong }
+        if characterCount >= 12 && classes >= 2 { return .good }
+        return .usable
+    }
+
+    private static func characterClassCount(_ password: String) -> Int {
+        var containsLowercase = false
+        var containsUppercase = false
+        var containsNumber = false
+        var containsSymbol = false
+
+        for scalar in password.unicodeScalars {
+            switch scalar.value {
+            case 97...122:
+                containsLowercase = true
+            case 65...90:
+                containsUppercase = true
+            case 48...57:
+                containsNumber = true
+            default:
+                containsSymbol = true
+            }
+        }
+
+        return [containsLowercase, containsUppercase, containsNumber, containsSymbol]
+            .filter { $0 }
+            .count
+    }
+}
+
 struct AuthenticationView: View {
     @EnvironmentObject private var store: AppStore
     @Environment(\.dismiss) private var dismiss
@@ -494,30 +574,47 @@ struct AuthenticationView: View {
                         }
                         .pickerStyle(.segmented)
 
-                        VStack(spacing: 14) {
-                            InputField(
-                                title: store.text("用户名", "Username"),
-                                icon: "person",
-                                text: $username
-                            )
-                            .focused($focusedField, equals: .username)
-                            .textInputAutocapitalization(.never)
-                            .autocorrectionDisabled()
-
+                        VStack(spacing: mode == .register ? 18 : 14) {
                             if mode == .register {
-                                InputField(
-                                    title: store.text("昵称", "Nickname"),
-                                    icon: "face.smiling",
-                                    text: $nickname
-                                )
-                                .focused($focusedField, equals: .nickname)
-                            }
+                                RegistrationUsernameField(text: $username)
+                                    .focused($focusedField, equals: .username)
 
-                            SecureInputField(
-                                title: store.text("密码", "Password"),
-                                text: $password
-                            )
-                            .focused($focusedField, equals: .password)
+                                VStack(alignment: .leading, spacing: 7) {
+                                    InputField(
+                                        title: "昵称",
+                                        icon: "face.smiling",
+                                        text: $nickname,
+                                        borderColor: nickname.count > RegistrationInputRules.nicknameRange.upperBound
+                                            ? GapStyle.danger.opacity(0.65)
+                                            : GapStyle.line
+                                    )
+                                    .focused($focusedField, equals: .nickname)
+
+                                    if nickname.count > RegistrationInputRules.nicknameRange.upperBound {
+                                        Label("昵称过长，请缩短", systemImage: "xmark.circle.fill")
+                                            .font(.caption.weight(.medium))
+                                            .foregroundStyle(GapStyle.danger)
+                                    }
+                                }
+
+                                RegistrationPasswordField(text: $password)
+                                    .focused($focusedField, equals: .password)
+                            } else {
+                                InputField(
+                                    title: store.text("用户名", "Username"),
+                                    icon: "person",
+                                    text: $username
+                                )
+                                .focused($focusedField, equals: .username)
+                                .textInputAutocapitalization(.never)
+                                .autocorrectionDisabled()
+
+                                SecureInputField(
+                                    title: store.text("密码", "Password"),
+                                    text: $password
+                                )
+                                .focused($focusedField, equals: .password)
+                            }
                         }
 
                         Button {
@@ -534,7 +631,7 @@ struct AuthenticationView: View {
                             }
                         }
                         .buttonStyle(PrimaryActionButtonStyle())
-                        .disabled(store.isBusy || username.isEmpty || password.isEmpty || (mode == .register && nickname.isEmpty))
+                        .disabled(isPrimaryActionDisabled)
                     }
                     .padding(24)
                 }
@@ -549,12 +646,25 @@ struct AuthenticationView: View {
         }
         .presentationDetents([.large])
     }
+
+    private var isPrimaryActionDisabled: Bool {
+        if store.isBusy { return true }
+        switch mode {
+        case .login:
+            return username.isEmpty || password.isEmpty
+        case .register:
+            return !RegistrationInputRules.isUsernameValid(username)
+                || !RegistrationInputRules.isNicknameValid(nickname)
+                || !RegistrationInputRules.isPasswordValid(password)
+        }
+    }
 }
 
 private struct InputField: View {
     let title: String
     let icon: String
     @Binding var text: String
+    var borderColor: Color = GapStyle.line
 
     var body: some View {
         HStack(spacing: 12) {
@@ -567,7 +677,7 @@ private struct InputField: View {
         .background(GapStyle.surface, in: RoundedRectangle(cornerRadius: GapStyle.radius, style: .continuous))
         .overlay {
             RoundedRectangle(cornerRadius: GapStyle.radius, style: .continuous)
-                .stroke(GapStyle.line, lineWidth: 1)
+                .stroke(borderColor, lineWidth: 1)
         }
     }
 }
@@ -575,20 +685,270 @@ private struct InputField: View {
 private struct SecureInputField: View {
     let title: String
     @Binding var text: String
+    var borderColor: Color = GapStyle.line
+    @State private var isRevealed = false
 
     var body: some View {
         HStack(spacing: 12) {
             Image(systemName: "lock").foregroundStyle(GapStyle.secondary)
-            SecureField(title, text: $text)
-                .textFieldStyle(.plain)
+            Group {
+                if isRevealed {
+                    TextField(title, text: $text)
+                } else {
+                    SecureField(title, text: $text)
+                }
+            }
+            .textFieldStyle(.plain)
+
+            Button {
+                isRevealed.toggle()
+            } label: {
+                Image(systemName: isRevealed ? "eye.slash" : "eye")
+                    .foregroundStyle(GapStyle.secondary)
+                    .frame(width: 28, height: 40)
+            }
+            .buttonStyle(.plain)
+            .accessibilityLabel(isRevealed ? "隐藏密码" : "显示密码")
         }
         .padding(.horizontal, 16)
         .frame(height: 52)
         .background(GapStyle.surface, in: RoundedRectangle(cornerRadius: GapStyle.radius, style: .continuous))
         .overlay {
             RoundedRectangle(cornerRadius: GapStyle.radius, style: .continuous)
-                .stroke(GapStyle.line, lineWidth: 1)
+                .stroke(borderColor, lineWidth: 1)
         }
+    }
+}
+
+private enum RegistrationRuleState {
+    case neutral
+    case satisfied
+    case invalid
+
+    var color: Color {
+        switch self {
+        case .neutral:
+            GapStyle.secondary
+        case .satisfied:
+            GapStyle.urge
+        case .invalid:
+            GapStyle.danger
+        }
+    }
+
+    var symbol: String {
+        switch self {
+        case .neutral:
+            "circle"
+        case .satisfied:
+            "checkmark.circle.fill"
+        case .invalid:
+            "xmark.circle.fill"
+        }
+    }
+}
+
+private struct RegistrationFieldHeader: View {
+    let title: String
+    let count: String
+    var countColor: Color = GapStyle.secondary
+
+    var body: some View {
+        HStack(alignment: .firstTextBaseline) {
+            Text(title)
+                .font(.subheadline.weight(.semibold))
+                .foregroundStyle(GapStyle.ink)
+            Spacer()
+            Text(count)
+                .font(.caption.monospacedDigit().weight(.semibold))
+                .foregroundStyle(countColor)
+                .contentTransition(.numericText())
+        }
+    }
+}
+
+private struct RegistrationRuleLabel: View {
+    let text: String
+    let state: RegistrationRuleState
+
+    var body: some View {
+        Label(text, systemImage: state.symbol)
+            .font(.caption.weight(.medium))
+            .foregroundStyle(state.color)
+            .animation(.easeOut(duration: 0.16), value: state.symbol)
+    }
+}
+
+private struct RegistrationUsernameField: View {
+    @Binding var text: String
+
+    private var lengthIsValid: Bool {
+        RegistrationInputRules.usernameRange.contains(text.count)
+    }
+
+    private var charactersAreValid: Bool {
+        !text.isEmpty && text.unicodeScalars.allSatisfy { scalar in
+            let value = scalar.value
+            return (97...122).contains(value)
+                || (48...57).contains(value)
+                || value == 95
+        }
+    }
+
+    private var isValid: Bool {
+        RegistrationInputRules.isUsernameValid(text)
+    }
+
+    private func ruleState(_ satisfied: Bool) -> RegistrationRuleState {
+        if text.isEmpty { return .neutral }
+        return satisfied ? .satisfied : .invalid
+    }
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 8) {
+            RegistrationFieldHeader(
+                title: "用户名",
+                count: "\(text.count) / 20",
+                countColor: text.count > 20 ? GapStyle.danger : GapStyle.secondary
+            )
+            InputField(
+                title: "例如 gapzilla_01",
+                icon: "person",
+                text: $text,
+                borderColor: text.isEmpty || isValid ? GapStyle.line : GapStyle.danger.opacity(0.65)
+            )
+            .textInputAutocapitalization(.never)
+            .autocorrectionDisabled()
+
+            ViewThatFits(in: .horizontal) {
+                HStack(spacing: 14) {
+                    RegistrationRuleLabel(text: "3–20 个字符", state: ruleState(lengthIsValid))
+                    RegistrationRuleLabel(text: "小写字母、数字或 _", state: ruleState(charactersAreValid))
+                }
+                VStack(alignment: .leading, spacing: 5) {
+                    RegistrationRuleLabel(text: "3–20 个字符", state: ruleState(lengthIsValid))
+                    RegistrationRuleLabel(text: "小写字母、数字或 _", state: ruleState(charactersAreValid))
+                }
+            }
+        }
+    }
+}
+
+private struct RegistrationPasswordField: View {
+    @Binding var text: String
+
+    private var byteCount: Int {
+        RegistrationInputRules.passwordByteCount(text)
+    }
+
+    private var isValid: Bool {
+        RegistrationInputRules.isPasswordValid(text)
+    }
+
+    private var strength: RegistrationPasswordStrength {
+        RegistrationInputRules.passwordStrength(text)
+    }
+
+    private var strengthColor: Color {
+        if byteCount > RegistrationInputRules.passwordTechnicalMaxBytes { return GapStyle.danger }
+        return switch strength {
+        case .empty:
+            GapStyle.line
+        case .weak:
+            GapStyle.slip
+        case .usable:
+            GapStyle.warning
+        case .good:
+            GapStyle.info
+        case .strong:
+            GapStyle.urge
+        }
+    }
+
+    private var strengthText: String {
+        if byteCount > RegistrationInputRules.passwordTechnicalMaxBytes { return "密码过长" }
+        return switch strength {
+        case .empty:
+            "输入后显示强度"
+        case .weak:
+            "偏弱"
+        case .usable:
+            "一般"
+        case .good:
+            "良好"
+        case .strong:
+            "较强"
+        }
+    }
+
+    private var ruleState: RegistrationRuleState {
+        if text.isEmpty { return .neutral }
+        return isValid ? .satisfied : .invalid
+    }
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 8) {
+            Text("密码")
+                .font(.subheadline.weight(.semibold))
+                .foregroundStyle(GapStyle.ink)
+            SecureInputField(
+                title: "输入密码",
+                text: $text,
+                borderColor: text.isEmpty || isValid ? GapStyle.line : GapStyle.danger.opacity(0.65)
+            )
+
+            PasswordStrengthMeter(
+                strength: strength,
+                color: strengthColor,
+                label: strengthText,
+                fillsAllSegments: byteCount > RegistrationInputRules.passwordTechnicalMaxBytes
+            )
+
+            HStack(alignment: .firstTextBaseline) {
+                RegistrationRuleLabel(
+                    text: byteCount > RegistrationInputRules.passwordTechnicalMaxBytes
+                        ? "密码过长，请缩短"
+                        : "至少 8 位",
+                    state: ruleState
+                )
+                Spacer()
+                if isValid {
+                    Text("强度仅作提示")
+                        .font(.caption)
+                        .foregroundStyle(GapStyle.secondary)
+                }
+            }
+        }
+    }
+}
+
+private struct PasswordStrengthMeter: View {
+    let strength: RegistrationPasswordStrength
+    let color: Color
+    let label: String
+    let fillsAllSegments: Bool
+
+    var body: some View {
+        HStack(spacing: 10) {
+            HStack(spacing: 5) {
+                ForEach(0..<4, id: \.self) { index in
+                    Capsule()
+                        .fill(index < filledSegments ? color : GapStyle.line.opacity(0.72))
+                        .frame(height: 6)
+                }
+            }
+            Text(label)
+                .font(.caption.weight(.semibold))
+                .foregroundStyle(strength == .empty ? GapStyle.secondary : color)
+                .frame(minWidth: 72, alignment: .trailing)
+        }
+        .animation(.easeOut(duration: 0.18), value: strength.rawValue)
+        .accessibilityElement(children: .ignore)
+        .accessibilityLabel("密码强度：\(label)")
+    }
+
+    private var filledSegments: Int {
+        fillsAllSegments ? 4 : strength.filledSegments
     }
 }
 
