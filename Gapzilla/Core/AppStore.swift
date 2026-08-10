@@ -79,14 +79,14 @@ final class AppStore: ObservableObject {
         }
     }
 
-    func register(username: String, password: String, nickname: String) async -> Bool {
+    func register(username: String, password: String) async -> Bool {
         await authenticate {
             try await api.post(
                 "/api/v1/auth/register",
                 body: RegisterPayload(
                     username: username,
                     password: password,
-                    nickname: nickname,
+                    nickname: username,
                     device: DevicePayload(deviceName: UIDevice.current.model)
                 )
             )
@@ -144,14 +144,18 @@ final class AppStore: ObservableObject {
         }
     }
 
-    func createAppleAccount(choice: AppleAccountChoice, nickname: String) async -> Bool {
-        await completeAppleAccountChoice {
+    func createAppleAccount(choice: AppleAccountChoice) async -> Bool {
+        let suggestedNickname = choice.suggestedNickname.trimmingCharacters(in: .whitespacesAndNewlines)
+        let compatibilityNickname = suggestedNickname.isEmpty
+            ? "Gapzilla 用户"
+            : String(suggestedNickname.prefix(64))
+        return await completeAppleAccountChoice {
             try await api.post(
                 "/api/v1/auth/apple/create-account",
                 body: AppleCreateAccountPayload(
                     pendingToken: choice.pendingToken,
                     credential: choice.credential,
-                    nickname: nickname,
+                    nickname: compatibilityNickname,
                     device: DevicePayload(deviceName: UIDevice.current.model)
                 )
             )

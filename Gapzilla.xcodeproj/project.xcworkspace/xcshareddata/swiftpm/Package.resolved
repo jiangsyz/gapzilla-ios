@@ -1,0 +1,15 @@
+{
+  "originHash" : "c4bea3e77f7aea794ddbac7a7d1a162eed5db42a16d08038bb3bfa3063ef137b",
+  "pins" : [
+    {
+      "identity" : "zxcvbn-swift",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/DeVitoC/zxcvbn-swift",
+      "state" : {
+        "revision" : "127eb7def97cbc12138cff87a2a88ea9a285656c",
+        "version" : "1.0.2"
+      }
+    }
+  ],
+  "version" : 3
+}
